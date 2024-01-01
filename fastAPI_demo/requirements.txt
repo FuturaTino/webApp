@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography] # jwt 
+passlib[bcrtpt] # password hashing
+
+
