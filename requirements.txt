@@ -4,4 +4,6 @@ python-multipart
 python-jose[cryptography] # jwt 
 passlib[bcrtpt] # password hashing
 
+sqlalchemy==2.0.25
+
 
