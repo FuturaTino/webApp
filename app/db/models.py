@@ -35,6 +35,10 @@ class Capture(Base):
     date = Column(String, index=True)
     source_url = Column(String, index=True)
     result_url = Column(String, index=True)
+    latest_run_status = Column(String, index=True)
+    latest_run_progress = Column(String, index=True)
+    latest_run_current_stage = Column(String, index=True)
+    
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="captures")

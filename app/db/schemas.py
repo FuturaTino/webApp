@@ -15,26 +15,9 @@ class Item(ItemBase): # read
     class Config:
         orm_model = True 
 
-class UserBase(BaseModel):
-    email: str 
-
-class UserCreate(UserBase):
-    password: str 
-
-class User(UserBase):
-    id:int
-    username: Union[str, None] = None 
-    is_activate: Union[str, None] = True
-    items: List[Item] = []
-    
-    class Config:
-        orm_model = True 
-
-class UserNotFound(BaseModel):
-    message: Union[str, None] = None
-
+# Capture
 class CaptureStatus(BaseModel):
-    id:str
+    uuid:str
     latest_run_status:str
     latest_run_progress:str
     latest_run_current_stage:str
@@ -56,9 +39,39 @@ class CaptureBase(BaseModel):
 class CaptureCreate(CaptureBase):
     pass
 
+class CaptureResponse(CaptureBase):
+    pass
 class Capture(CaptureBase):
     id:int 
     owner_id: int
 
     class Config:
         orm_model = True
+
+# User 
+class UserBase(BaseModel):
+    email: str 
+
+class UserCreate(UserBase):
+    password: str 
+
+class UserResponse(UserBase):
+    id:int
+    username: Union[str, None] = None 
+    is_activate: Union[str, None] = True
+    captures: List[Capture] = []
+    class Config:
+        orm_model = True
+        
+class User(UserBase):
+    id:int
+    username: Union[str, None] = None 
+    is_activate: Union[str, None] = True
+    items: List[Item] = []
+    captures: List[Capture] = []
+    class Config:
+        orm_model = True 
+
+class UserNotFound(BaseModel):
+    message: Union[str, None] = None
+
