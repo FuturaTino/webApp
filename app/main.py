@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from db import crud , models, schemas
@@ -19,7 +20,20 @@ app.include_router(items.router)
 app.include_router(captures.router) 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    content = """
+<body>
+<form action="/files/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+<input name="title" type="text">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0")

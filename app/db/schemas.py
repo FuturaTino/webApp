@@ -17,7 +17,6 @@ class Item(ItemBase): # read
 
 # Capture
 class CaptureStatus(BaseModel):
-    uuid:str
     latest_run_status:str
     latest_run_progress:str
     latest_run_current_stage:str
@@ -39,8 +38,6 @@ class CaptureBase(BaseModel):
 class CaptureCreate(CaptureBase):
     pass
 
-class CaptureResponse(CaptureBase):
-    pass
 class Capture(CaptureBase):
     id:int 
     owner_id: int
@@ -51,13 +48,13 @@ class Capture(CaptureBase):
 # User 
 class UserBase(BaseModel):
     email: str 
+    username:str
 
 class UserCreate(UserBase):
     password: str 
 
 class UserResponse(UserBase):
     id:int
-    username: Union[str, None] = None 
     is_activate: Union[str, None] = True
     captures: List[Capture] = []
     class Config:
@@ -65,7 +62,6 @@ class UserResponse(UserBase):
         
 class User(UserBase):
     id:int
-    username: Union[str, None] = None 
     is_activate: Union[str, None] = True
     items: List[Item] = []
     captures: List[Capture] = []

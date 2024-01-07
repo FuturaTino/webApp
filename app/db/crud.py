@@ -4,7 +4,7 @@ from . import models, schemas
 # User CRUD
 def create_user(db:Session, user: schemas.UserCreate): 
     # fake_hashed_password = user.password + "notreallyhased"
-    db_user = models.User(email=user.email)
+    db_user = models.User(email=user.email,username=user.username)
     db.add(db_user)
     db.commit() 
     db.refresh(db_user)
@@ -34,17 +34,25 @@ def get_users(db: Session, skip: int = 0 , limit:int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()  
 
 # Capture CRUD
+
 def get_capture(db:Session, capture_id:int):
     return db.query(models.Capture).filter(models.Capture.id == capture_id).first()
 
-def create_capture(db:Session, capture:schemas.CaptureCreate):
-    db_capture = models.Capture(**capture.model_dump()) # pydantic schemas is meant to provide the data .
+def get_user_captures(db:Session, user_id:int, skip:int = 0, limit: int = 100):
+    return db.query(models.Capture).filter(models.Capture.owner_id == user_id).offset(skip).limit(limit).all()
+
+def create_capture(db:Session, capture:schemas.CaptureCreate, user_id:int):
+    d1 = vars(capture.info)
+    d2 = vars(capture.status)
+    d1.update(d2) 
+    db_capture = models.Capture(**d1,owner_id=user_id) # pydantic schemas is meant to provide the data .
     db.add(db_capture)
     db.commit()
     db.refresh(db_capture)
     return db_capture
 
 def update_capture(db:Session, capture_id:int, capture:schemas.CaptureCreate):
+    
     db_capture = db.query(models.Capture).filter(models.Capture.id == capture_id).first()
     if db_capture is not None:
         db_capture.name = capture.name
@@ -65,7 +73,7 @@ def delete_capture(db:Session, capture_id:int):
             "message":"Capture deleted successfully", 
         }
     else:
-        return {"message": "Capture not found"}
+        return {"message": "Capture not found"} 
 
 
 

@@ -1,22 +1,29 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
 from db import crud , models, schemas
-from fastapi import HTTPException, Depends
+
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from typing import List 
+from uuid import uuid4
+from datetime import datetime
 router = APIRouter()
 
-@router.get("/captures/", response_model=List[schemas.CaptureResponse])
+# wait for upgrade
+
+@router.get("/captures/", response_model=List[schemas.Capture])
 def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     captures = crud.get_captures(db, skip=skip, limit=limit)
 
     # Construct response_model
-    info = map(lambda capture: schemas.CaptureInfo(**capture.__dict__), captures)
-    status = map(lambda capture: schemas.CaptureStatus(**capture.__dict__), captures)
-    response = map(lambda info, status: schemas.CaptureResponse(info=info, status=status), info, status)
-    return response
+    infos = map(lambda capture: schemas.CaptureInfo(**capture.__dict__), captures)
+    statuses = map(lambda capture: schemas.CaptureStatus(**capture.__dict__), captures)
+    ids = map(lambda capture: capture.id, captures)
+    owner_ids = map(lambda capture: capture.owner_id, captures)
+    
+    captures = map(lambda id, info, status, owner_id: schemas.Capture(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
+    return captures
 
-@router.get("/captures/{capture_id}", response_model=schemas.CaptureResponse)
+@router.get("/captures/{capture_id}", response_model=schemas.Capture)
 def read_capture(capture_id:int, db:Session = Depends(get_db)):
     db_capture = crud.get_capture(db, capture_id=capture_id)
     if db_capture is None:
@@ -25,12 +32,38 @@ def read_capture(capture_id:int, db:Session = Depends(get_db)):
     # Construct response_model
     info = schemas.CaptureInfo(**db_capture.__dict__)
     status = schemas.CaptureStatus(**db_capture.__dict__)
-    response = schemas.CaptureResponse(info=info, status=status) #class attr needs to be passed as kwargs
-    return response
+    id = db_capture.id
+    owner_id = db_capture.owner_id
+    capture = schemas.Capture(id=id, info=info, status=status, owner_id=owner_id)
+    return capture
+
+@router.get("/users/{user_id}/captures/", response_model=List[schemas.Capture])
+def read_user_captures(user_id:int, skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
+    captures = crud.get_user_captures(db, user_id=user_id, skip=skip, limit=limit)
+
+    # Construct response_model
+    ids = map(lambda capture: capture.id, captures) 
+    infos = map(lambda capture: schemas.CaptureInfo(**capture.__dict__), captures)
+    statuses = map(lambda capture: schemas.CaptureStatus(**capture.__dict__), captures)
+    owner_ids = map(lambda capture: capture.owner_id, captures)
+    captures = map(lambda id, info, status, owner_id: schemas.Capture(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
+    return captures
 
 @router.post("/users/{user_id}/captures/" )
-def create_capture_for_users(user_id:int, capture:schemas.CaptureCreate, db:Session = Depends(get_db)):
-    return crud.create_user_capture(db=db, capture=capture, user_id=user_id)
+async def create_file(user_id:int , file: UploadFile, title:str = Form(),db:Session = Depends(get_db)):
+    uuid = str(uuid4())
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    work_type = "reconstruction"
+    slug = title + "-" + date
+
+    # Save the file
+    file_location = f"./{file.filename}"
+    with open(file_location, "wb+") as file_object:
+        file_object.write(await file.read())
+
+    capture = schemas.CaptureCreate(info=schemas.CaptureInfo(uuid=uuid, slug=slug, title=title, work_type=work_type, date=date), status=schemas.CaptureStatus(uuid=uuid, latest_run_status="running", latest_run_progress="0", latest_run_current_stage="downloading"))
+    crud.create_capture(db=db, capture=capture,user_id=user_id)
+    return {"filename": file.filename, "title": title,"message":"File saved successfully"}
 
 @router.patch("/captures/{capture_id}" )
 def update_capture(capture_id:int, capture:schemas.CaptureCreate, db:Session = Depends(get_db)):
