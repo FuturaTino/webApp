@@ -1,10 +1,12 @@
 from fastapi import APIRouter,HTTPException,Depends, status ,Response
 
-from schemas.users import UserInDB, UserOutDB
+from schemas.users import UserInDB, UserOutDB,LoginInDB
 from schemas.captures import CaptureInfo, CaptureStatus, Capture
 
 from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_users
 from crud.captures import get_user_captures
+
+from core.auth import create_access_token, verify_password, get_password_hash
 
 from sqlalchemy.orm import Session
 from dependencies import get_db
@@ -22,12 +24,27 @@ def register(user: UserInDB, db:Session = Depends(get_db)):
 
     return {
         "message":"User created successfully",
-        "user":db_user
+        "user":UserOutDB(**db_user.__dict__)
     }
 
 @router.post("/login",tags=["Auth"])
-def login(user: UserInDB, db:Session = Depends(get_db)):
-    pass
+def login(user: LoginInDB, db:Session = Depends(get_db)):
+    db_user = get_user_by_email(db, email=user.email)
+    if db_user is None:
+        db_user = get_user_by_username(db, username=user.username)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+    if db_user.password != user.password:
+        raise HTTPException(status_code=400, detail="Password incorrect")
+    
+    access_token = create_access_token(username=db_user.username)
+
+    return {
+        "message":"Login successfully",
+        "user":UserOutDB(**db_user.__dict__),
+        "token": access_token
+    }
 
 
 @router.get("/users/", response_model=List[UserOutDB])
