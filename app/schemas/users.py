@@ -1,6 +1,6 @@
 from typing import List, Union
 from pydantic import BaseModel
-from schemas.captures import Capture 
+from schemas.captures import CaptureOutDB,CaptureReponse
 from schemas.items import Item 
 
 class UserBase(BaseModel):
@@ -19,15 +19,14 @@ class LoginInDB(BaseModel):
 class UserOutDB(UserBase):
     id:int
     is_activate: Union[bool, None] = True
-    captures: List[Capture] = []
+    captures: List[CaptureOutDB] = []
     class Config:
         orm_model = True
         
-class User(UserBase):
+class UserResponse(UserBase):
     id:int
     is_activate: Union[str, None] = True
-    items: List[Item] = []
-    captures: List[Capture] = []
+    captures: List[CaptureReponse] = []
     class Config:
         orm_model = True 
 

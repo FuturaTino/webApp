@@ -1,6 +1,6 @@
 from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
 
-from schemas.captures import Capture, CaptureInfo, CaptureStatus, CaptureInDB
+from schemas.captures import  CaptureInDB,CaptureOutDB,CaptureReponse, CaptureInfo, CaptureStatus
 from crud.captures import get_captures, get_capture, get_user_captures, create_capture, delete_capture
 
 
@@ -9,44 +9,50 @@ from core.dependencies import get_db
 from typing import List 
 from uuid import uuid4
 from datetime import datetime
-from dotenv import load_dotenv
+from dotenv import load_dotenv,find_dotenv
 import os 
 from pathlib import Path 
 
 
 router = APIRouter()
-load_dotenv('.env')
-STORAGE_DIR = os.getenv("STORAGE_DIR")
-
+load_dotenv(find_dotenv('.env'))
+backend_dir = Path(__file__).parent.parent
+STORAGE_DIR = backend_dir / os.getenv("STORAGE_DIR")
 # wait for upgrade
-@router.get("/captures/", response_model=List[Capture])
+@router.get("/captures/", response_model=List[CaptureReponse])
 def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
-    captures = get_captures(db, skip=skip, limit=limit)
-
-    # Construct response_model
-    infos = map(lambda capture: CaptureInfo(**capture.__dict__), captures)
-    statuses = map(lambda capture: CaptureStatus(**capture.__dict__), captures)
-    ids = map(lambda capture: capture.id, captures)
-    owner_ids = map(lambda capture: capture.owner_id, captures)
+    db_captures = get_captures(db, skip=skip, limit=limit)
     
-    captures = map(lambda id, info, status, owner_id: Capture(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
-    return captures
+    captures_out_db = list(map(lambda capture: CaptureOutDB(**capture.__dict__), db_captures))
+    
+    # Construct response_model
+    ids = map(lambda capture: capture.id, captures_out_db)
+    infos = map(lambda capture: CaptureInfo(**capture.__dict__), captures_out_db)
+    statuses = map(lambda capture: CaptureStatus(**capture.__dict__), captures_out_db)
+    owner_ids = map(lambda capture: capture.owner_id, captures_out_db)
 
-@router.get("/captures/{capture_id}", response_model=Capture)
+    response = map(lambda id, info, status, owner_id: CaptureReponse(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
+
+
+    return response
+
+@router.get("/captures/{capture_id}", response_model=CaptureReponse)
 def read_capture(capture_id:int, db:Session = Depends(get_db)):
     db_capture = get_capture(db, capture_id=capture_id)
     if db_capture is None:
         raise HTTPException(status_code=404, detail="Capture not found")
+    
     
     # Construct response_model
     info = CaptureInfo(**db_capture.__dict__)
     status = CaptureStatus(**db_capture.__dict__)
     id = db_capture.id
     owner_id = db_capture.owner_id
-    capture = Capture(id=id, info=info, status=status, owner_id=owner_id)
+    capture = CaptureReponse(id=id, info=info, status=status, owner_id=owner_id)
     return capture
 
-@router.get("/users/{user_id}/captures/", response_model=List[Capture])
+
+@router.get("/users/{user_id}/captures/", response_model=List[CaptureReponse])
 def read_user_captures(user_id:int, skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     captures = get_user_captures(db, user_id=user_id, skip=skip, limit=limit)
 
@@ -55,7 +61,7 @@ def read_user_captures(user_id:int, skip:int = 0, limit:int = 100, db:Session = 
     infos = map(lambda capture: CaptureInfo(**capture.__dict__), captures)
     statuses = map(lambda capture: CaptureStatus(**capture.__dict__), captures)
     owner_ids = map(lambda capture: capture.owner_id, captures)
-    captures = map(lambda id, info, status, owner_id: Capture(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
+    captures = map(lambda id, info, status, owner_id: CaptureReponse(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
     return captures
 
 @router.post("/users/{user_id}/captures/" )
@@ -68,13 +74,24 @@ async def create_file(user_id:int , file: UploadFile, title:str = Form(),db:Sess
     # Save the file
     # cwrd: app
     video_location = Path(STORAGE_DIR) / uuid / file.filename
-    print(video_location)
     if not video_location.parent.exists():
         video_location.parent.mkdir(parents=True)
     with open(video_location, "wb+") as file_object:
         file_object.write(await file.read())
 
-    capture = CaptureInDB(info=CaptureInfo(uuid=uuid, slug=slug, title=title, work_type=work_type, date=date), status=CaptureStatus(uuid=uuid, latest_run_status="processing", latest_run_current_stage="processing"))
+    kwargs = {
+        "uuid":uuid,
+        "title":title,
+        "slug":slug,
+        "date":date,
+        "work_type":work_type,
+        "source_url":str(video_location),
+        "result_url":None,
+        "latest_run_status":None,
+        "latest_run_current_stage":None,
+        "owner_id":user_id
+    }
+    capture = CaptureInDB(**kwargs)
     create_capture(db=db, capture=capture,user_id=user_id)
     return {"filename": file.filename, "title": title,"message":"File saved successfully"}
 

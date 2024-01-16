@@ -1,7 +1,7 @@
 from fastapi import APIRouter,HTTPException,Depends, status ,Response
 
-from schemas.users import UserInDB, UserOutDB,LoginInDB
-from schemas.captures import CaptureInfo, CaptureStatus, Capture
+from schemas.users import UserInDB, UserOutDB,LoginInDB,UserResponse
+from schemas.captures import CaptureInfo, CaptureStatus, CaptureReponse
 
 from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_users
 from crud.captures import get_user_captures
@@ -47,7 +47,7 @@ def login(user: LoginInDB, db:Session = Depends(get_db)):
     }
 
 
-@router.get("/users/", response_model=List[UserOutDB])
+@router.get("/users/", response_model=List[UserResponse])
 def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     users = get_users(db, skip=skip, limit=limit)
     
@@ -58,9 +58,9 @@ def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     ids = list(map(lambda user_captures: list(map(lambda capture: capture.id, user_captures)), users_captures))
     owner_ids = list(map(lambda user_captures: list(map(lambda capture: capture.owner_id, user_captures)), users_captures))
 
-    each_user_captures = map(lambda id, info, status, owner_id: map(lambda id, info, status, owner_id: Capture(id=id, info=info, status=status, owner_id=owner_id), id, info, status, owner_id), ids, infos, statuses, owner_ids)
+    each_user_captures = map(lambda id, info, status, owner_id: map(lambda id, info, status, owner_id: CaptureReponse(id=id, info=info, status=status, owner_id=owner_id), id, info, status, owner_id), ids, infos, statuses, owner_ids)
 
-    response = map(lambda user,user_captures: UserOutDB(
+    response = map(lambda user,user_captures: UserResponse(
     email=user.email,
     id=user.id,
     username=user.username,
@@ -69,7 +69,7 @@ def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
 ), users,each_user_captures)
     return response
 
-@router.get("/users/{user_id}", response_model=UserOutDB)
+@router.get("/users/{user_id}", response_model=UserResponse)
 def read_user(user_id:int, db:Session = Depends(get_db)):
     db_user = get_user(db, user_id=user_id)
     if db_user is None:
@@ -82,8 +82,8 @@ def read_user(user_id:int, db:Session = Depends(get_db)):
     ids = map(lambda capture: capture.id, db_user_captures)
     owner_id = map(lambda capture: capture.owner_id, db_user_captures)
 
-    captures = map(lambda id, info, status, owner_id: Capture(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_id)
-    response = UserOutDB(**db_user.__dict__, captures=captures)
+    captures = map(lambda id, info, status, owner_id: CaptureReponse(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_id)
+    response = UserResponse(**db_user.__dict__, captures=captures)
     # response = UserOutDB(**db_user.__dict__)
     return response
 

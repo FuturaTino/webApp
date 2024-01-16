@@ -1,6 +1,5 @@
 *.json
 __pycache__
 *.db
-*.mp4
+storage/*.mp4
 *.env
-storage

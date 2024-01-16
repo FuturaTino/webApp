@@ -14,16 +14,14 @@ def get_user_captures(db:Session, user_id:int, skip:int = 0, limit: int = 100):
     return db.query(Capture).filter(Capture.owner_id == user_id).offset(skip).limit(limit).all()
 
 def create_capture(db:Session, capture:CaptureInDB, user_id:int):
-    d1 = vars(capture.info)
-    d2 = vars(capture.status)
-    d1.update(d2) 
-    db_capture = Capture(**d1,owner_id=user_id) # pydantic schemas is meant to provide the data .
+
+    db_capture = Capture(**capture.__dict__) # pydantic schemas is meant to provide the data .
     db.add(db_capture)
     db.commit()
     db.refresh(db_capture)
     return {
         "message":"Capture created successfully", 
-        "uuid": capture.info.uuid,
+        "uuid": capture.uuid
     }
 
 
