@@ -1,30 +1,34 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,HTTPException,Depends, status ,Response
 
 from schemas.users import UserInDB, UserOutDB
 from schemas.captures import CaptureInfo, CaptureStatus, Capture
-from crud.users import get_users, get_user, get_user_by_email, get_user_by_username,create_user, delete_users
+
+from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_users
 from crud.captures import get_user_captures
-from fastapi import HTTPException, Depends, status 
+
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from typing import List 
+
 router = APIRouter()
 
-
-
-@router.post("/users/")
-def create_user(user: UserInDB, db:Session = Depends(get_db)):
-    flag_email = get_user_by_email(db, email=user.email) # Actually schema is pydantic model
-    flag_username = get_user_by_username(db, username=user.username)
-    if flag_email and  flag_username:
-        raise HTTPException(status_code=400, detail="Email and username already registered")
-    elif flag_email:
+@router.post("/register",tags=["Auth"])
+def register(user: UserInDB, db:Session = Depends(get_db)):
+    if get_user_by_email(db, email=user.email) is not None:
         raise HTTPException(status_code=400, detail="Email already registered")
-    elif flag_username:
+    elif get_user_by_username(db, username=user.username) is not None:
         raise HTTPException(status_code=400, detail="Username already registered")
-    else:
-        create_user(db=db, user=user) 
-        return {"message": "User created successfully"}
+    db_user = create_user(db=db, user=user)
+
+    return {
+        "message":"User created successfully",
+        "user":db_user
+    }
+
+@router.post("/login",tags=["Auth"])
+def login(user: UserInDB, db:Session = Depends(get_db)):
+    pass
+
 
 @router.get("/users/", response_model=List[UserOutDB])
 def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
