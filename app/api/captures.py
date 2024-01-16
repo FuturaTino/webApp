@@ -5,7 +5,7 @@ from crud.captures import get_captures, get_capture, get_user_captures, create_c
 
 
 from sqlalchemy.orm import Session
-from dependencies import get_db
+from core.dependencies import get_db
 from typing import List 
 from uuid import uuid4
 from datetime import datetime

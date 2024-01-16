@@ -5,7 +5,7 @@ from crud.items import get_items, create_user_item
 
 
 from sqlalchemy.orm import Session
-from dependencies import get_db
+from core.dependencies import get_db
 from typing import List
 
 router = APIRouter()

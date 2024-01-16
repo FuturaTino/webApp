@@ -10,6 +10,6 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     username = Column(String, unique=True, index=True)
     is_active = Column(Boolean, default=True)
-
+    password  = Column(String, index=True, nullable=False)
     items = relationship("Item", back_populates="owner")
     captures = relationship("Capture", back_populates="owner", cascade="all, delete")

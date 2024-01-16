@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from db.database import Base
 from db.database import SessionLocal, engine
 from core.router import all_routers
-from dependencies import get_db
+from core.dependencies import get_db
 
 from typing import List
 

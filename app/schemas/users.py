@@ -4,12 +4,18 @@ from schemas.captures import Capture
 from schemas.items import Item 
 
 class UserBase(BaseModel):
-    email: str 
+    email: str
     username:str
 
 class UserInDB(UserBase):
     password: str 
 
+
+class LoginInDB(BaseModel):
+    email: Union[str, None] = None
+    username: Union[str, None] = None
+    password: str
+    
 class UserOutDB(UserBase):
     id:int
     is_activate: Union[bool, None] = True

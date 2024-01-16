@@ -9,7 +9,7 @@ from crud.captures import get_user_captures
 from core.auth import create_access_token, verify_password, get_password_hash
 
 from sqlalchemy.orm import Session
-from dependencies import get_db
+from core.dependencies import get_db
 from typing import List 
 
 router = APIRouter()

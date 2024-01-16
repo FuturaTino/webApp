@@ -6,8 +6,7 @@ from models.captures import Capture
 from schemas.users import UserInDB
 
 def create_user(db:Session, user: UserInDB): 
-    # fake_hashed_password = user.password + "notreallyhased"
-    db_user = User(email=user.email,username=user.username)
+    db_user = User(email=user.email,username=user.username,password=user.password)
     db.add(db_user)
     db.commit() 
     db.refresh(db_user)
