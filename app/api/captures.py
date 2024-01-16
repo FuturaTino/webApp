@@ -1,11 +1,14 @@
 from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
 
 from schemas.captures import  CaptureInDB,CaptureOutDB,CaptureReponse, CaptureInfo, CaptureStatus
+
 from crud.captures import get_captures, get_capture, get_user_captures, create_capture, delete_capture
 
+from core.dependencies import get_db
+from core.auth import get_current_user
 
 from sqlalchemy.orm import Session
-from core.dependencies import get_db
+
 from typing import List 
 from uuid import uuid4
 from datetime import datetime
@@ -37,7 +40,7 @@ def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     return response
 
 @router.get("/captures/{capture_id}", response_model=CaptureReponse)
-def read_capture(capture_id:int, db:Session = Depends(get_db)):
+def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     db_capture = get_capture(db, capture_id=capture_id)
     if db_capture is None:
         raise HTTPException(status_code=404, detail="Capture not found")

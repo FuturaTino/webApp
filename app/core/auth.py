@@ -9,7 +9,7 @@ from datetime import timedelta,datetime
 # openssl rand -hex 32
 SECRET_KEY = "563c5a7fb2d1b73dc7dfda946fa5ad7341ee2fd2fbea702a9d1e04b5e403a8c7"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 14
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -24,7 +24,7 @@ def get_password_hash(password:str):
     return pwd_context.hash(password)
 
 
-def create_access_token(username:str,expires_delta:timedelta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
+def create_access_token(username:str,expires_delta:timedelta = timedelta(days=ACCESS_TOKEN_EXPIRE_MINUTES)):
     expire = datetime.utcnow() + expires_delta
     to_encode = {
         "sub": username,

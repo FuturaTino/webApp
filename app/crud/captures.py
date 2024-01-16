@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
 from models.captures import Capture
-
+from models.users import User
 from schemas.captures import CaptureInDB
 
 def get_capture(db:Session, capture_id:int):
     return db.query(Capture).filter(Capture.id == capture_id).first()
+
 
 def get_captures(db:Session, skip:int = 0, limit: int = 100):
     return db.query(Capture).offset(skip).limit(limit).all()
@@ -12,6 +13,13 @@ def get_captures(db:Session, skip:int = 0, limit: int = 100):
 
 def get_user_captures(db:Session, user_id:int, skip:int = 0, limit: int = 100):
     return db.query(Capture).filter(Capture.owner_id == user_id).offset(skip).limit(limit).all()
+
+def get_user_captures_by_username(db:Session, username:str, skip:int = 0, limit: int = 100):
+    owner_id = db.query(User).filter(User.username == username).first()
+    if owner_id is not None:
+        return db.query(Capture).filter(Capture.owner_id == owner_id.id).offset(skip).limit(limit).all()
+    else:
+        return None
 
 def create_capture(db:Session, capture:CaptureInDB, user_id:int):
 

@@ -9,7 +9,6 @@ from core.dependencies import get_db
 from typing import List
 
 from fastapi import APIRouter
-from api import items, users, captures
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()

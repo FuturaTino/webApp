@@ -1,7 +1,7 @@
 from typing import List, Union
 from pydantic import BaseModel
 from schemas.captures import CaptureOutDB,CaptureReponse
-from schemas.items import Item 
+
 
 class UserBase(BaseModel):
     email: str
