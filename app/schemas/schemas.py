@@ -18,7 +18,6 @@ class Item(ItemBase): # read
 # Capture
 class CaptureStatus(BaseModel):
     latest_run_status:str
-    latest_run_progress:str
     latest_run_current_stage:str
 
 class CaptureInfo(BaseModel):
@@ -40,7 +39,7 @@ class CaptureCreate(CaptureBase):
 
 class Capture(CaptureBase):
     id:int 
-    owner_id: int
+    owner_id: Union[int, None] = None
 
     class Config:
         orm_model = True
@@ -55,7 +54,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id:int
-    is_activate: Union[str, None] = True
+    is_activate: Union[bool, None] = True
     captures: List[Capture] = []
     class Config:
         orm_model = True

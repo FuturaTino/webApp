@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status 
-from db import crud , models, schemas
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.models import models
+from app.schemas import schemas 
+from app.crud import crud
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from typing import List

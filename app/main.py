@@ -1,8 +1,10 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
+from app.models import models
+from app.schemas import schemas
 
-from db import crud , models, schemas
+from app.crud import crud
 from db.database import SessionLocal, engine
 
 from dependencies import get_db
@@ -10,7 +12,7 @@ from dependencies import get_db
 from typing import List
 
 from fastapi import APIRouter
-from routers import items, users, captures
+from api import items, users, captures
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -36,4 +38,4 @@ def read_root():
     return HTMLResponse(content=content)
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0")
+    uvicorn.run(app, host="0.0.0.0",reload=True)

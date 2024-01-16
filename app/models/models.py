@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
-from .database import Base
+from ..db.database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -12,7 +12,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     items = relationship("Item", back_populates="owner")
-    captures = relationship("Capture", back_populates="owner")
+    captures = relationship("Capture", back_populates="owner", cascade="all, delete")
 
 class Item(Base):
     __tablename__ = "items"
@@ -36,7 +36,6 @@ class Capture(Base):
     source_url = Column(String, index=True)
     result_url = Column(String, index=True)
     latest_run_status = Column(String, index=True)
-    latest_run_progress = Column(String, index=True)
     latest_run_current_stage = Column(String, index=True)
     
     owner_id = Column(Integer, ForeignKey("users.id"))

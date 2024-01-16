@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
+
+from ..models import models
+from ..schemas import schemas
 
 # User CRUD
 def create_user(db:Session, user: schemas.UserCreate): 
@@ -12,9 +14,12 @@ def create_user(db:Session, user: schemas.UserCreate):
 
 def delete_users(db:Session, user_id:int):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    db_user_captures = db.query(models.Capture).filter(models.Capture.owner_id == user_id)
     if db_user is not None:
+        # 级联删除，删除用户的同时删除用户的所有capture
         db.delete(db_user)
         db.commit()
+
         return {
             "message":"User deleted successfully", 
         }
@@ -49,15 +54,28 @@ def create_capture(db:Session, capture:schemas.CaptureCreate, user_id:int):
     db.add(db_capture)
     db.commit()
     db.refresh(db_capture)
-    return db_capture
+    return {
+        "message":"Capture created successfully", 
+        "uuid": capture.info.uuid,
+    }
 
-def update_capture(db:Session, capture_id:int, capture:schemas.CaptureCreate):
-    
-    db_capture = db.query(models.Capture).filter(models.Capture.id == capture_id).first()
+
+def update_capture_status(db:Session, task_id:str, latest_run_current_stage:str,latest_run_status:str):
+    db_capture = db.query(models.Capture).filter(models.Capture.uuid == task_id).first()
     if db_capture is not None:
-        db_capture.name = capture.name
-        db_capture.description = capture.description
-        db_capture.image = capture.image
+        db_capture.latest_run_current_stage = latest_run_current_stage
+        db_capture.latest_run_status = latest_run_status 
+        db.commit()
+        db.refresh(db_capture)
+        return db_capture
+    else:
+        return {"message": "Capture not found"}
+
+def update_capture_info(db:Session, task_id:str,source_url:str, result_url:str):
+    db_capture = db.query(models.Capture).filter(models.Capture.uuid == task_id).first()
+    if db_capture is not None:
+        db_capture.source_url = source_url
+        db_capture.result_url = result_url 
         db.commit()
         db.refresh(db_capture)
         return db_capture
@@ -91,28 +109,3 @@ def create_user_item(db:Session, item:schemas.ItemCreate, user_id:int):
 def get_captures(db:Session, skip:int = 0, limit: int = 100):
     return db.query(models.Capture).offset(skip).limit(limit).all()
 
-def create_user_capture(db:Session, capture:schemas.CaptureCreate, user_id:int):
-    
-    # Turn pydantic model format data to db model format data
-    #  pydantic schemas is meant to provide the data in a compelex json format
-    db_capture = models.Capture(
-        uuid=capture.info.uuid,
-        slug=capture.info.slug,
-        title=capture.info.title,
-        work_type=capture.info.work_type,
-        date=capture.info.date,
-        source_url=capture.info.source_url,
-        result_url=capture.info.result_url,
-        latest_run_status=capture.status.latest_run_status,
-        latest_run_progress=capture.status.latest_run_progress,
-        latest_run_current_stage=capture.status.latest_run_current_stage,
-        owner_id=user_id
-    )
-
-    db.add(db_capture)
-    db.commit()
-    db.refresh(db_capture)
-    return {
-        "message":"Capture created successfully", 
-        "uuid": capture.info.uuid,
-    }

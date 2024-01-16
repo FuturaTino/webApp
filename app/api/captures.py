@@ -1,15 +1,23 @@
 from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
-from db import crud , models, schemas
+from app.models import models
+from app.schemas import schemas
+from app.crud import crud
 
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from typing import List 
 from uuid import uuid4
 from datetime import datetime
+from dotenv import load_dotenv
+import os 
+from pathlib import Path 
+
+
 router = APIRouter()
+load_dotenv('.env')
+STORAGE_DIR = os.getenv("STORAGE_DIR")
 
 # wait for upgrade
-
 @router.get("/captures/", response_model=List[schemas.Capture])
 def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     captures = crud.get_captures(db, skip=skip, limit=limit)
@@ -57,11 +65,15 @@ async def create_file(user_id:int , file: UploadFile, title:str = Form(),db:Sess
     slug = title + "-" + date
 
     # Save the file
-    file_location = f"./{file.filename}"
-    with open(file_location, "wb+") as file_object:
+    # cwrd: app
+    video_location = Path(STORAGE_DIR) / uuid / file.filename
+    print(video_location)
+    if not video_location.parent.exists():
+        video_location.parent.mkdir(parents=True)
+    with open(video_location, "wb+") as file_object:
         file_object.write(await file.read())
 
-    capture = schemas.CaptureCreate(info=schemas.CaptureInfo(uuid=uuid, slug=slug, title=title, work_type=work_type, date=date), status=schemas.CaptureStatus(uuid=uuid, latest_run_status="running", latest_run_progress="0", latest_run_current_stage="downloading"))
+    capture = schemas.CaptureCreate(info=schemas.CaptureInfo(uuid=uuid, slug=slug, title=title, work_type=work_type, date=date), status=schemas.CaptureStatus(uuid=uuid, latest_run_status="processing", latest_run_current_stage="processing"))
     crud.create_capture(db=db, capture=capture,user_id=user_id)
     return {"filename": file.filename, "title": title,"message":"File saved successfully"}
 
@@ -69,6 +81,6 @@ async def create_file(user_id:int , file: UploadFile, title:str = Form(),db:Sess
 def update_capture(capture_id:int, capture:schemas.CaptureCreate, db:Session = Depends(get_db)):
     return crud.update_capture(db=db, capture_id=capture_id, capture=capture)
 
-@router.delete("/captures/{capture_id}", responses={200: {"description": "Capture deleted"}, 404: {"description": "Capture not found"}})
+@router.delete("/captures/{capture_id}")
 def delete_capture(capture_id:int, db:Session = Depends(get_db)):
     return crud.delete_capture(db=db,capture_id=capture_id)
