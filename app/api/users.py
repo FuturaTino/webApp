@@ -6,7 +6,7 @@ from schemas.captures import CaptureInfo, CaptureStatus, CaptureReponse
 from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_users
 from crud.captures import get_user_captures
 
-from core.auth import create_access_token, verify_password, get_password_hash
+from core.auth import create_access_token, verify_password, get_password_hash,get_current_user
 
 from sqlalchemy.orm import Session
 from core.dependencies import get_db
@@ -47,7 +47,7 @@ def login(user: LoginInDB, db:Session = Depends(get_db)):
     }
 
 
-@router.get("/users/", response_model=List[UserResponse])
+@router.get("/users/all", response_model=List[UserResponse],summary="获取所有用户的信息")
 def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     users = get_users(db, skip=skip, limit=limit)
     
@@ -69,12 +69,14 @@ def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
 ), users,each_user_captures)
     return response
 
-@router.get("/users/{user_id}", response_model=UserResponse)
-def read_user(user_id:int, db:Session = Depends(get_db)):
-    db_user = get_user(db, user_id=user_id)
+@router.get("/users/my", response_model=UserResponse,summary="在拥有token的前提下，获取当前用户的信息")
+def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
+    db_user = get_user_by_username(db, username=current_username)
+
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    db_user_captures = get_user_captures(db, user_id=user_id)
+    
+    db_user_captures = get_user_captures(db, user_id=db_user.id)
 
     # Construct response_model  from db 2 pydantic model, pydantic need info and status instance.
     infos = map(lambda capture: CaptureInfo(**capture.__dict__), db_user_captures)
@@ -88,6 +90,6 @@ def read_user(user_id:int, db:Session = Depends(get_db)):
     return response
 
 
-@router.delete("/users/{user_id}", responses={200: {"description": "User deleted"}, 404: {"description": "User not found"}})
+@router.delete("/users/{user_id}",summary="删除当前用户的信息")
 def delete_users(user_id:int, db:Session = Depends(get_db)):
     return delete_users(db=db,user_id=user_id)

@@ -1,8 +1,10 @@
 from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
 
 from schemas.captures import  CaptureInDB,CaptureOutDB,CaptureReponse, CaptureInfo, CaptureStatus
+from schemas.users import UserResponse
 
 from crud.captures import get_captures, get_capture, get_user_captures, create_capture, delete_capture
+from crud.users import get_user_by_username
 
 from core.dependencies import get_db
 from core.auth import get_current_user
@@ -21,8 +23,8 @@ router = APIRouter()
 load_dotenv(find_dotenv('.env'))
 backend_dir = Path(__file__).parent.parent
 STORAGE_DIR = backend_dir / os.getenv("STORAGE_DIR")
-# wait for upgrade
-@router.get("/captures/", response_model=List[CaptureReponse])
+
+@router.get("/captures/all", response_model=List[CaptureReponse],summary="获取所有作品的信息")
 def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     db_captures = get_captures(db, skip=skip, limit=limit)
     
@@ -39,7 +41,7 @@ def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
 
     return response
 
-@router.get("/captures/{capture_id}", response_model=CaptureReponse)
+@router.get("/captures/{capture_id}", response_model=CaptureReponse,summary="根据作品id,获取所有作品中某个作品的信息")
 def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     db_capture = get_capture(db, capture_id=capture_id)
     if db_capture is None:
@@ -55,33 +57,16 @@ def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:s
     return capture
 
 
-@router.get("/users/{user_id}/captures/", response_model=List[CaptureReponse])
-def read_user_captures(user_id:int, skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
-    captures = get_user_captures(db, user_id=user_id, skip=skip, limit=limit)
-
-    # Construct response_model
-    ids = map(lambda capture: capture.id, captures) 
-    infos = map(lambda capture: CaptureInfo(**capture.__dict__), captures)
-    statuses = map(lambda capture: CaptureStatus(**capture.__dict__), captures)
-    owner_ids = map(lambda capture: capture.owner_id, captures)
-    captures = map(lambda id, info, status, owner_id: CaptureReponse(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_ids)
-    return captures
-
-@router.post("/users/{user_id}/captures/" )
-async def create_file(user_id:int , file: UploadFile, title:str = Form(),db:Session = Depends(get_db)):
+@router.post("/captures/my/create",summary="在拥有token的前提下，该用户创建一个作品" )
+async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     uuid = str(uuid4())
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     work_type = "reconstruction"
     slug = title + "-" + date
-
-    # Save the file
-    # cwrd: app
+    db_user = get_user_by_username(db, username=current_username)
     video_location = Path(STORAGE_DIR) / uuid / file.filename
-    if not video_location.parent.exists():
-        video_location.parent.mkdir(parents=True)
-    with open(video_location, "wb+") as file_object:
-        file_object.write(await file.read())
 
+    # Create capture in db
     kwargs = {
         "uuid":uuid,
         "title":title,
@@ -92,16 +77,39 @@ async def create_file(user_id:int , file: UploadFile, title:str = Form(),db:Sess
         "result_url":None,
         "latest_run_status":None,
         "latest_run_current_stage":None,
-        "owner_id":user_id
+        "owner_id":db_user.id
     }
     capture = CaptureInDB(**kwargs)
-    create_capture(db=db, capture=capture,user_id=user_id)
+    create_capture(db=db, capture=capture,user_id=db_user.id)
+
+    # Save the file
+    if not video_location.parent.exists():
+        video_location.parent.mkdir(parents=True)
+    with open(video_location, "wb+") as file_object:
+        file_object.write(await file.read())
+
     return {"filename": file.filename, "title": title,"message":"File saved successfully"}
 
-@router.patch("/captures/{capture_id}" )
-def update_capture(capture_id:int, capture:CaptureInDB, db:Session = Depends(get_db)):
-    return update_capture(db=db, capture_id=capture_id, capture=capture)
+@router.get("/captures/my/show", response_model=UserResponse,summary="在拥有token的前提下，获取当前用户的信息与所有作品")
+def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
+    db_user = get_user_by_username(db, username=current_username)
 
-@router.delete("/captures/{capture_id}")
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db_user_captures = get_user_captures(db, user_id=db_user.id)
+
+    # Construct response_model  from db 2 pydantic model, pydantic need info and status instance.
+    infos = map(lambda capture: CaptureInfo(**capture.__dict__), db_user_captures)
+    statuses = map(lambda capture: CaptureStatus(**capture.__dict__), db_user_captures) 
+    ids = map(lambda capture: capture.id, db_user_captures)
+    owner_id = map(lambda capture: capture.owner_id, db_user_captures)
+
+    captures = map(lambda id, info, status, owner_id: CaptureReponse(id=id, info=info, status=status, owner_id=owner_id), ids, infos, statuses, owner_id)
+    response = UserResponse(**db_user.__dict__, captures=captures)
+    # response = UserOutDB(**db_user.__dict__)
+    return response
+
+@router.delete("/captures/{capture_id}",summary="无需token,删除某个作品")
 def delete_capture(capture_id:int, db:Session = Depends(get_db)):
     return delete_capture(db=db,capture_id=capture_id)

@@ -55,7 +55,7 @@ def update_capture_info(db:Session, task_id:str,source_url:str, result_url:str):
     else:
         return {"message": "Capture not found"}
 
-def delete_capture(db:Session, capture_id:int):
+def delete_capture(db:Session, capture_id:int)->dict:
     db_capture = db.query(Capture).filter(Capture.id == capture_id).first()
     if db_capture is not None:
         db.delete(db_capture)
