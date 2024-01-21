@@ -149,7 +149,7 @@ def convert_video_to_images(
     CONSOLE.log("[bold green]:tada: Done converting video to images.")
     return summary_log, num_final_frames
 
-def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=True,skip_matching:bool=False,colmap_executable:str="",resize:bool=True,magick_executable:str="",verbose:bool=True):
+def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=True,skip_matching:bool=False,colmap_executable:str="",resize:bool=False,magick_executable:str="",verbose:bool=True):
 
 
     colmap_command = '"{}"'.format(colmap_executable) if len(colmap_executable) > 0 else "colmap"
@@ -204,6 +204,7 @@ def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=Tru
         destination_file = os.path.join(source_path, "sparse", "0", file)
         shutil.move(source_file, destination_file)
 
+    shutil.rmtree
     if(resize):
         print("Copying and resizing...")
 

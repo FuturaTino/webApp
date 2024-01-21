@@ -4,7 +4,7 @@ import time
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from process_image import convert_video_to_images,convert_images_to_colmap
+from app.core.colmap.convert import convert_video_to_images,convert_images_to_colmap
 import shutil 
 
 load_dotenv('.env')
@@ -50,7 +50,7 @@ def procressing(self,filepath:str):
     """
     Deal with veideo data to pre-processed colmap data
     """
-    convert_video_to_images(filepath,self.dir)
+    # convert_video_to_images(filepath,self.dir)
     convert_images_to_colmap(self.dir)
     # crud.update_capture
     
