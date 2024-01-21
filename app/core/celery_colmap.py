@@ -4,11 +4,16 @@ import time
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from app.crud import crud
 from process_image import convert_video_to_images,convert_images_to_colmap
 import shutil 
-from app.db import get_db 
+
 load_dotenv('.env')
+
+# todo 
+
+# 1. crud.update_capture
+# 2. stage and status update.
+# 3. sum up the whole process 
 
 class ProcessingTask(Task):
     def __init__(self):
@@ -18,7 +23,6 @@ class ProcessingTask(Task):
         if not self.dir.exists():
             self.dir.mkdir()
 
-        # crud.update_capture
         
         
     def after_return(self, status, retval, task_id, args, kwargs, einfo):

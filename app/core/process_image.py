@@ -149,7 +149,7 @@ def convert_video_to_images(
     CONSOLE.log("[bold green]:tada: Done converting video to images.")
     return summary_log, num_final_frames
 
-def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=False,skip_matching:bool=False,colmap_executable:str="",resize:bool=True,magick_executable:str="",verbose:bool=False):
+def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=True,skip_matching:bool=False,colmap_executable:str="",resize:bool=True,magick_executable:str="",verbose:bool=True):
 
 
     colmap_command = '"{}"'.format(colmap_executable) if len(colmap_executable) > 0 else "colmap"
@@ -244,6 +244,11 @@ def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=Fal
 
 
 if __name__ =="__main__":
-    video_path = Path('D:\Repo\webApp\eraLi.mp4')
-    image_dir = Path(fr'D:\Repo\webApp\app\storage\auoiqwe-ajlkasdu\images')
-    convert_video_to_images(video_path,image_dir,300,0)
+
+    video_path = Path(rf'D:\Repo\webApp\app\storage\2f43fef3-b3e1-440c-b9de-7c269970e639\eraLi.mp4')
+    dir = video_path.parent
+    image_dir = dir / "input"
+    print(image_dir)
+    # convert_video_to_images(video_path,image_dir,300,0)
+
+    convert_images_to_colmap(str(dir))
