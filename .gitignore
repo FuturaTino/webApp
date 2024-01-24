@@ -15,5 +15,10 @@
 *.json
 __pycache__
 *.db
-storage/**
+**/storage/**
 *.env
+../__pycache__
+.vscode/
+.pytest_cache
+__pycache__/
+
