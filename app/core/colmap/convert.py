@@ -51,7 +51,7 @@ def convert_video_to_images(
     video_path: Path,
     image_dir: Path,
     num_frames_target: int,
-    num_downscales: int,
+    num_downscales: int=0,
     crop_factor: Tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0),
     verbose: bool = False,
     image_prefix: str = "frame_",
@@ -203,8 +203,12 @@ def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=Tru
         source_file = os.path.join(source_path, "sparse", file)
         destination_file = os.path.join(source_path, "sparse", "0", file)
         shutil.move(source_file, destination_file)
+    
+    try:
+        shutil.rmtree(source_path + "/distorted")
+    except Exception as e:
+        print(e)
 
-    shutil.rmtree
     if(resize):
         print("Copying and resizing...")
 
@@ -246,7 +250,7 @@ def convert_images_to_colmap(source_path:str,camera:str="OPENCV",no_gpu:bool=Tru
 
 if __name__ =="__main__":
 
-    video_path = Path(rf'D:\Repo\webApp\app\storage\2f43fef3-b3e1-440c-b9de-7c269970e639\eraLi.mp4')
+    video_path = Path(rf'D:\Repo\webApp\app\storage\2f43fef3-b3e1-440c-b9de-7c269970e639\2f43fef3-b3e1-440c-b9de-7c269970e639.mp4')
     dir = video_path.parent
     image_dir = dir / "input"
     print(image_dir)

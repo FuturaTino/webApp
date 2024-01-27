@@ -1,40 +1,28 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db.database import Base
 from db.database import SessionLocal, engine
 from core.router import all_routers
 from core.dependencies import get_db
-
 from typing import List
-
 from fastapi import APIRouter
-
+from fastapi import Request
+from crud.captures import get_captures
+from core.dependencies import get_db
 Base.metadata.create_all(bind=engine)
-app = FastAPI()
 
+app = FastAPI()
+templates = Jinja2Templates(directory="app/templates")
+
+@app.get("/admin",tags=["index"])
+def read_root(request:Request,db:Session = Depends(get_db)):
+    captures = get_captures(db)
+
+    return templates.TemplateResponse("index.html", {"request": request,"captures": captures})
 
 app.include_router(all_routers)
-
-def read_root():
-    content = """
-<body>
-<form action="/files/" enctype="multipart/form-data" method="post">
-<input name="files" type="file" multiple>
-<input type="submit">
-</form>
-<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
-<input name="title" type="text">
-<input name="files" type="file" multiple>
-<input type="submit">
-</form>
-</body>
-    """
-    return HTMLResponse(content=content)
-
-# app.include_router(users.router)
-app.get("/", response_class=HTMLResponse)(read_root)
-
 
 if __name__ == "__main__":
     import uvicorn

@@ -25,4 +25,6 @@ def check_install():
         return meta
 
 if __name__ == '__main__':
-    print(check_install())
+    from colmap_app import process,colmap_app
+    uuid = '2f43fef3-b3e1-440c-b9de-7c269970e639'
+    process.apply_async((uuid,),task_id=uuid)

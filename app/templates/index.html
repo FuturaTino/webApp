@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+    <style>
+        table {
+            border-collapse: collapse; /* 合并边框 */
+            width: 100%; /* 表格宽度为 100% */
+            text-align: center; /* 文本居中 */
+        }
+        th, td {
+            border: 1px solid black; /* 设置边框 */
+            padding: 10px; /* 设置内边距 */
+        }
+        button {
+            margin: 5px;
+        }
+    </style>
+    
+    <h1>后端渲染</h1>
+    <p>测试表格</p>
+    <table>
+        <tr>
+            <th>选项</th>
+            <th>id</th>
+            <th>uuid</th>
+            <th>slug</th>
+            <th>title</th>
+            <th>work_type</th>
+            <th>date</th>
+            <th>source_url</th>
+            <th>result_url</th>
+            <th>latest_run_status</th>
+            <th>latest_run_current_stage</th>
+            <th>owner_id</th>
+            <th>owner</th>
+        </tr>
+        {% for capture in captures%}
+            <tr>
+                <td>
+                    <button class="process">预处理</button>
+                    <button class="train">训练</button>
+                </td>
+                <td>{{capture.id}}</td>
+                <td>{{capture.uuid}}</td>
+                <td>{{capture.slug}}</td>
+                <td>{{capture.title}}</td>
+                <td>{{capture.work_type}}</td>
+                <td>{{capture.date}}</td>
+                <td>{{capture.source_url}}</td>
+                <td>{{capture.result_url}}</td>
+                <td>{{capture.latest_run_status}}</td>
+                <td>{{capture.latest_run_current_stage}}</td>
+                <td>{{capture.owner_id}}</td>
+                <td>{{capture.owner.username}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <button id="add">新增</button>
+    <button id="button">删除</button>
+
+    <script>
+        const addButton = document.getElementById("add");
+        const DleteButton = document.getElementById("button");
+        const ProcessButton = document.getElementsByClassName("process");
+        const TrainButton = document.getElementsByClassName("train");
+
+        addButton.addEventListener("click", function() {
+            alert("新增成功");
+
+        });
+        DleteButton.addEventListener("click", function() {
+            alert("删除成功");
+        });
+        
+        // Assuming ProcessButton is a HTMLCollection of buttons
+        Array.from(ProcessButton).forEach(button => {
+        button.addEventListener("click", function() {
+            axios.get("/captures/all")
+            .then(response => {
+                console.log(response.data);
+                alert(response.data);
+             })
+            })
+            .catch(error => {
+                console.log(error);
+                alert(error);
+            });
+        });
+    </script>
+
+</html>

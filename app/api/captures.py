@@ -88,7 +88,7 @@ async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(
     with open(video_location, "wb+") as file_object:
         file_object.write(await file.read())
 
-    return {"filename": file.filename, "title": title,"message":"File saved successfully"}
+    return {"filename": file.filename, "title": title,"uuid":uuid,"message":"File saved successfully"}
 
 @router.get("/captures/my/show", response_model=UserResponse,summary="在拥有token的前提下，获取当前用户的信息与所有作品")
 def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
@@ -110,6 +110,16 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
     # response = UserOutDB(**db_user.__dict__)
     return response
 
-@router.delete("/captures/{capture_id}",summary="无需token,删除某个作品")
+# 暂无用户认证，用于admin测试，不可以公开api
+@router.post("/captures/process",summary="无需token,处理某个作品")
+def process_capture(capture_id:int, db:Session = Depends(get_db)):
+    return {"message":"process capture"}
+@router.post("/captures/train",summary="无需token,训练某个作品")
+def train_capture(capture_id:int, db:Session = Depends(get_db)):
+    return {"message":"train capture"}
+@router.post("/captures/refresh",summary="无需token,刷新某个作品的状态")
+def refresh_capture(capture_id:int, db:Session = Depends(get_db)):
+    return {"message":"refresh capture"}
+@router.delete("/captures/delete",summary="无需token,删除某个作品")
 def delete_capture(capture_id:int, db:Session = Depends(get_db)):
     return delete_capture(db=db,capture_id=capture_id)
