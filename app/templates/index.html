@@ -73,19 +73,22 @@
             alert("删除成功");
         });
         
+
         // Assuming ProcessButton is a HTMLCollection of buttons
         Array.from(ProcessButton).forEach(button => {
         button.addEventListener("click", function() {
-            axios.get("/captures/all")
+            const row = this.closest('tr');
+            const uuid = row.cells[2].textContent;  // Assuming the UUID is in the 3rd column
+
+            axios.post("/captures/process", null, { params: { uuid: uuid } })
             .then(response => {
                 console.log(response.data);
                 alert(response.data);
-             })
             })
             .catch(error => {
                 console.log(error);
-                alert(error);
             });
+        });
         });
     </script>
 

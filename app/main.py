@@ -27,3 +27,6 @@ app.include_router(all_routers)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0",reload=True)
+
+# 1. 包引入、 模块 python基础 需要补一下
+# 2. celery自定义任务中，对数据库的引用

@@ -39,8 +39,8 @@ def create_capture(db:Session, capture:CaptureInDB, user_id:int):
         "uuid": capture.uuid
     }
 
-def update_capture_status(db:Session, task_id:str, status:CaptureStatus):
-    db_capture = db.query(Capture).filter(Capture.uuid == task_id).first()
+def update_capture_status(db:Session, uuid:str, status:CaptureStatus):
+    db_capture = db.query(Capture).filter(Capture.uuid == uuid).first()
     if db_capture is not None:
         db_capture.latest_run_current_stage = status.latest_run_current_stage
         db_capture.latest_run_status = status.latest_run_status

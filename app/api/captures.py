@@ -3,12 +3,13 @@ from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
 from schemas.captures import  CaptureInDB,CaptureOutDB,CaptureReponse, CaptureInfo, CaptureStatus
 from schemas.users import UserResponse
 
-from crud.captures import get_captures, get_capture, get_user_captures, create_capture, delete_capture
+from crud.captures import get_captures, get_capture, get_user_captures, create_capture, update_capture_status,delete_capture,STATUS
 from crud.users import get_user_by_username
 
 from core.dependencies import get_db
 from core.auth import get_current_user
-
+# from core.colmap.colmap_app import process
+from colmap_app import process
 from sqlalchemy.orm import Session
 
 from typing import List 
@@ -112,14 +113,23 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
 
 # 暂无用户认证，用于admin测试，不可以公开api
 @router.post("/captures/process",summary="无需token,处理某个作品")
-def process_capture(capture_id:int, db:Session = Depends(get_db)):
-    return {"message":"process capture"}
+def enqueued_capture(uuid:str, db:Session = Depends(get_db)):
+    try:
+        process.apply_async((uuid,),task_id=uuid)
+        update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])
+    except Exception as e:
+        print(e)
+        update_capture_status(db=db, uuid=uuid, status=STATUS['Failed'])
+        raise HTTPException(status_code=500, detail=e)
+
+    return {"message":f"{uuid} is queued for processing"}
+
 @router.post("/captures/train",summary="无需token,训练某个作品")
-def train_capture(capture_id:int, db:Session = Depends(get_db)):
+def train_capture(uuid:str, db:Session = Depends(get_db)):
     return {"message":"train capture"}
 @router.post("/captures/refresh",summary="无需token,刷新某个作品的状态")
-def refresh_capture(capture_id:int, db:Session = Depends(get_db)):
+def refresh_capture(uuid:str, db:Session = Depends(get_db)):
     return {"message":"refresh capture"}
 @router.delete("/captures/delete",summary="无需token,删除某个作品")
-def delete_capture(capture_id:int, db:Session = Depends(get_db)):
-    return delete_capture(db=db,capture_id=capture_id)
+def delete_capture(uuid:str, db:Session = Depends(get_db)):
+    return {"message":"delete capture"}
