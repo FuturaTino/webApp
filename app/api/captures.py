@@ -65,7 +65,7 @@ async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(
     work_type = "reconstruction"
     slug = title + "-" + date
     db_user = get_user_by_username(db, username=current_username)
-    video_location = Path(STORAGE_DIR) / uuid / file.filename
+    video_location = Path(STORAGE_DIR) / uuid / f"{uuid}.mp4"
 
     # Create capture in db
     kwargs = {
@@ -126,7 +126,17 @@ def enqueued_capture(uuid:str, db:Session = Depends(get_db)):
 
 @router.post("/captures/train",summary="无需token,训练某个作品")
 def train_capture(uuid:str, db:Session = Depends(get_db)):
-    return {"message":"train capture"}
+    try:
+        # train.apply_async((uuid,),task_id=uuid)
+        pass # 训练功能暂未实现
+        update_capture_status(db=db, uuid=uuid, status=STATUS['Reconstructing'])
+    except Exception as e:
+        print(e)
+        update_capture_status(db=db, uuid=uuid, status=STATUS['Failed'])
+        raise HTTPException(status_code=500, detail=e)
+    
+    return {"message":f"{uuid} is reconstructing"}
+
 @router.post("/captures/refresh",summary="无需token,刷新某个作品的状态")
 def refresh_capture(uuid:str, db:Session = Depends(get_db)):
     return {"message":"refresh capture"}

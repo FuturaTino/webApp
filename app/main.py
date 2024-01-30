@@ -26,7 +26,11 @@ app.include_router(all_routers)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0",reload=True)
+
+    # 检测是否有worker，是否有redis数据库
+    
+    uvicorn.run("main:app", host="127.0.0.1",reload=True)
 
 # 1. 包引入、 模块 python基础 需要补一下
 # 2. celery自定义任务中，对数据库的引用
+# 3.保证每一个任务的STATUS都能在停止后继续进行
