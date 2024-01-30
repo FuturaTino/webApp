@@ -3,7 +3,7 @@ from fastapi import APIRouter,HTTPException, Depends, Form,UploadFile
 from schemas.captures import  CaptureInDB,CaptureOutDB,CaptureReponse, CaptureInfo, CaptureStatus
 from schemas.users import UserResponse
 
-from crud.captures import get_captures, get_capture, get_user_captures, create_capture, update_capture_status,delete_capture,STATUS
+from crud.captures import get_captures, get_capture, get_user_captures, create_capture, update_capture_status,delete_a_capture,STATUS
 from crud.users import get_user_by_username
 
 from core.dependencies import get_db
@@ -18,7 +18,7 @@ from datetime import datetime
 from dotenv import load_dotenv,find_dotenv
 import os 
 from pathlib import Path 
-
+import shutil
 
 router = APIRouter()
 load_dotenv(find_dotenv('.env'))
@@ -140,6 +140,17 @@ def train_capture(uuid:str, db:Session = Depends(get_db)):
 @router.post("/captures/refresh",summary="无需token,刷新某个作品的状态")
 def refresh_capture(uuid:str, db:Session = Depends(get_db)):
     return {"message":"refresh capture"}
+
 @router.delete("/captures/delete",summary="无需token,删除某个作品")
 def delete_capture(uuid:str, db:Session = Depends(get_db)):
-    return {"message":"delete capture"}
+    try:
+        shutil.rmtree(STORAGE_DIR / uuid)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=e)
+    try:
+        delete_a_capture(db=db, uuid=uuid)
+        return {"message":"delete capture"}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=e)

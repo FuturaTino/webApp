@@ -12,6 +12,11 @@
             border: 1px solid black; /* 设置边框 */
             padding: 10px; /* 设置内边距 */
         }
+        #btnGroup {
+            display: flex;  /* Make the td element a flex container */
+
+            margin: 5px;
+        }
         button {
             margin: 5px;
         }
@@ -38,10 +43,12 @@
         </tr>
         {% for capture in captures%}
             <tr>
-                <td>
-                    <button class="process">预处理</button>
-                    <button class="train">训练</button>
-                    <button id="button">删除</button>
+                <td >
+                    <div id="btnGroup">
+                        <button class="process">预处理</button>
+                        <button class="train">训练</button>
+                        <button class="delete">删除</button>
+                    </div>
                 </td>
                 <td>{{capture.id}}</td>
                 <td>{{capture.uuid}}</td>
@@ -63,7 +70,7 @@
 
     <script>
         const addButton = document.getElementById("add");
-        const DleteButton = document.getElementById("button");
+        const DleteButton = document.getElementsByClassName("delete");
         const ProcessButton = document.getElementsByClassName("process");
         const TrainButton = document.getElementsByClassName("train");
 
@@ -71,8 +78,23 @@
             alert("新增成功");
 
         });
-        DleteButton.addEventListener("click", function() {
-            alert("删除成功");
+        
+        // Assuming DleteButton is a HTMLCollection of buttons
+        Array.from(DleteButton).forEach(button => {
+            button.addEventListener("click", function() {
+                this.disabled = true;
+                const row = this.closest('tr');
+                const uuid = row.cells[2].textContent;  // Assuming the UUID is in the 3rd column
+
+                axios.delete("/captures/delete", { params: { uuid: uuid } })
+                .then(response => {
+                    console.log(response.data);
+                    alert(response.data);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            });
         });
     
         // Assuming ProcessButton is a HTMLCollection of buttons
