@@ -24,6 +24,12 @@
     
     <h1>后端渲染</h1>
     <p>测试表格</p>
+    <form method="post">
+        <input type="text" id="username" name="username" placeholder="请输入用户名"><br/>
+        <input type="password" id="password" name="password" placeholder="请输入密码">
+        <input type="submit" id="submit" value="登录">
+    </form>
+    <div id="board"></div>
     <button id="add">新增</button>
     <table>
         <tr>
@@ -69,16 +75,54 @@
 
 
     <script>
+        const board = document.getElementById("board");
         const addButton = document.getElementById("add");
         const DleteButton = document.getElementsByClassName("delete");
         const ProcessButton = document.getElementsByClassName("process");
         const TrainButton = document.getElementsByClassName("train");
+        // 记得设置自签名ssl证书，才能使用https 证书实际上就是公钥。
+        // 用户用浏览器时候，先用公钥进行加密，传输加密数据给服务器 服务器上有私钥，进行解密。
 
-        addButton.addEventListener("click", function() {
-            alert("新增成功");
+        document.querySelector('form').addEventListener('submit', function(event) {
+            // Prevent the form from being submitted normally
+            event.preventDefault();
 
+            // Get the form data
+            var formData = new FormData(event.target);
+
+            // Convert the form data to JSON
+            var jsonObject = {};
+            for (const [key, value]  of formData.entries()) {
+                jsonObject[key] = value;
+            }
+            var json = JSON.stringify(jsonObject);
+
+            // Send the JSON data using fetch
+            fetch('http://localhost:8000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            }).then(response => {
+                // Handle the response here
+                
+                return response.json();
+            }).then(data=>{
+                // Handle login data
+                console.log(data.token);
+                localStorage.setItem('token', data.token);
+                // 在board上显示登陆成功，用户名，token,登陆时间，添加多个p标签分别来实现
+                const p = document.createElement('p');
+                p.textContent = `登陆成功，用户名：${data.user.username}，登陆时间: ${new Date()}，token：${data.token}`;
+                board.appendChild(p);
+                
+            }).catch(error => {
+                // Handle the error here
+                console.error(error);
+            });
         });
-        
+
         // Assuming DleteButton is a HTMLCollection of buttons
         Array.from(DleteButton).forEach(button => {
             button.addEventListener("click", function() {
