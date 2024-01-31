@@ -14,7 +14,7 @@ from typing import List
 
 router = APIRouter()
 
-@router.post("/register",tags=["Auth"])
+@router.post("/auth/register",tags=["Auth"])
 def register(user: UserInDB, db:Session = Depends(get_db)):
     if get_user_by_email(db, email=user.email) is not None:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -27,7 +27,7 @@ def register(user: UserInDB, db:Session = Depends(get_db)):
         "user":UserOutDB(**db_user.__dict__)
     }
 
-@router.post("/login",tags=["Auth"])
+@router.post("/auth/login",tags=["Auth"])
 def login(user: LoginInDB, db:Session = Depends(get_db)):
     db_user = get_user_by_email(db, email=user.email)
     if db_user is None:
