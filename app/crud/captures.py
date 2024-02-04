@@ -4,9 +4,10 @@ from models.users import User
 from schemas.captures import CaptureInDB
 from schemas.captures import CaptureStatus
 STATUS = {
-    "Uploading":CaptureStatus(latest_run_current_stage="New", latest_run_status="Queued"),
+    "Uploading":CaptureStatus(latest_run_current_stage="New", latest_run_status="Uploading"),
     "Queued":CaptureStatus(latest_run_current_stage="New", latest_run_status="Queued"),
     "PreProcessing":CaptureStatus(latest_run_current_stage="Preprocessing", latest_run_status="Dispatched"),
+    "Queue_2":CaptureStatus(latest_run_current_stage="Preprocessed", latest_run_status="Queued_2"),
     "Reconstructing":CaptureStatus(latest_run_current_stage="Reconstructing", latest_run_status="Dispatched"),
     "Failed":CaptureStatus(latest_run_current_stage="Finished", latest_run_status="Failed"),
     "Success":CaptureStatus(latest_run_current_stage="Finished", latest_run_status="Success"),

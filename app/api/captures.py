@@ -8,10 +8,11 @@ from crud.users import get_user_by_username
 
 from core.dependencies import get_db
 from core.auth import get_current_user
-# from core.colmap.colmap_app import process
-from colmap_app import process
-from sqlalchemy.orm import Session
 
+from celeryApp import process,reconstruct
+
+
+from sqlalchemy.orm import Session
 from typing import List 
 from uuid import uuid4
 from datetime import datetime
@@ -115,8 +116,16 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
 @router.post("/captures/process",summary="无需token,处理某个作品")
 def enqueued_capture(uuid:str, db:Session = Depends(get_db)):
     try:
-        process.apply_async((uuid,),task_id=uuid)
+        # task link https://docs.celeryq.dev/en/stable/userguide/calling.html
         update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])
+        process.apply_async(args=(uuid,),task_id=uuid,
+                            link=reconstruct.si(uuid).set(queue="gs",
+                                                          routing_key="gs.low",
+                                                          ignore_result=True,
+                                                          task_id=uuid),
+                            ignore_result=True,
+                            queue="colmap",
+                            routing_key="colmap.low")
     except Exception as e:
         print(e)
         update_capture_status(db=db, uuid=uuid, status=STATUS['Failed'])

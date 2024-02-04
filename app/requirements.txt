@@ -5,6 +5,7 @@ python-jose[cryptography] # jwt
 passlib[bcrtpt] # password hashing
 celery==5.3.6
 celery[redis]
+kombu
 redis==5.0.1
 sqlalchemy==2.0.25
 python-dotenv

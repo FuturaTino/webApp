@@ -97,7 +97,7 @@ def convert_video_to_images(
     if num_frames == 0:
         CONSOLE.print(f"[bold red]Error: Video has no frames: {video_path}")
         sys.exit(1)
-    CONSOLE.print("Number of frames in video:", num_frames)
+    # CONSOLE.print("Number of frames in video:", num_frames)
 
     ffmpeg_cmd = f'ffmpeg -i "{video_path}"'
 
@@ -128,7 +128,7 @@ def convert_video_to_images(
     ffmpeg_cmd += " -vsync vfr"
 
     if spacing > 1:
-        CONSOLE.print("Number of frames to extract:", math.ceil(num_frames / spacing))
+        # CONSOLE.print("Number of frames to extract:", math.ceil(num_frames / spacing))
         select_cmd = f"thumbnail={spacing},setpts=N/TB,"
     else:
         CONSOLE.print("[bold red]Can't satisfy requested number of frames. Extracting all frames.")
@@ -147,7 +147,7 @@ def convert_video_to_images(
     summary_log = []
     summary_log.append(f"Starting with {num_frames} video frames")
     summary_log.append(f"We extracted {num_final_frames} images with prefix '{image_prefix}'")
-    CONSOLE.log("[bold green]:tada: Done converting video to images.")
+    # CONSOLE.log("[bold green]:tada: Done converting video to images.")
     return summary_log, num_final_frames
 
 def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=True,skip_matching:bool=False,colmap_executable:str="",resize:bool=False,magick_executable:str="",verbose:bool=True):
