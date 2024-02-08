@@ -38,7 +38,6 @@ sudo apt-get install -y --no-install-recommends \
     wget
 # 清理缓存
 sudo rm -rf /var/lib/apt/lists/*
-
 # 克隆 glog 仓库
 git clone --branch v0.6.0 https://github.com/google/glog.git --single-branch
 cd glog
