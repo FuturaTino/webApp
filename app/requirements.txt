@@ -8,6 +8,7 @@ celery[redis]
 kombu
 redis==5.0.1
 sqlalchemy==2.0.25
+psycopg2==2.9.9
 python-dotenv
 pytest
 jinja2
