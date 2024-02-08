@@ -1,6 +1,7 @@
 <html>
     <head>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     </head>
     <style>
         table {
@@ -11,6 +12,25 @@
         th, td {
             border: 1px solid black; /* 设置边框 */
             padding: 10px; /* 设置内边距 */
+        }
+        .modal {
+            display:none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
         }
         #btnGroup {
             display: flex;  /* Make the td element a flex container */
@@ -29,8 +49,18 @@
         <input type="password" id="password" name="password" placeholder="请输入密码">
         <input type="submit" id="submit" value="登录">
     </form>
-    <div id="board"></div>
-    <button id="add">新增</button>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+          <h2 id="modalTitle">Modal Title</h2>
+          <input type="file" id="fileInput">
+          <input type="text" id="titleInput" placeholder="Enter title">
+          <button id="closeBtn">Close</button>
+          <button id="submitBtn">Submit</button>
+        </div>
+    </div>
+    <button id="openModalBtn" class="openModalBtn">新增</button>
+
+
     <table>
         <tr>
             <th>选项</th>
@@ -122,6 +152,32 @@
             });
         });
 
+
+        document.getElementById('openModalBtn').addEventListener('click', function() {
+        document.getElementById('myModal').style.display = 'block';
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', function() {
+        document.getElementById('myModal').style.display = 'none';
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', function() {
+        var title = document.getElementById('title').value;
+        var file = document.getElementById('file').files[0];
+        var formData = new FormData();
+        formData.append('title', title);
+        formData.append('file', file);
+
+        fetch('/captures/my/create', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error(error));
+
+        document.getElementById('myModal').style.display = 'none';
+        });
         // Assuming DleteButton is a HTMLCollection of buttons
         Array.from(DleteButton).forEach(button => {
             button.addEventListener("click", function() {
