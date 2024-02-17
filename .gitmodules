@@ -1,0 +1,3 @@
+[submodule "app/core/reconstruct/submodules/diff-gaussian-rasterization"]
+	path = app/core/reconstruct/submodules/diff-gaussian-rasterization
+	url = https://github.com/graphdeco-inria/diff-gaussian-rasterization
