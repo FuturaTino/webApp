@@ -20,3 +20,4 @@ __pycache__
 .vscode/
 .pytest_cache
 __pycache__/
+app/core/reconstruct/submodules/diff-gaussian-rasterization

@@ -1,17 +1,11 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import Capture  from './components/Capture.vue';
+
 </script>
 
 <template>
-  <header>
-
-    <div >
-      <HelloWorld/>
-    </div>
-  </header>
-
-  <RouterView />
+  <Capture/>
 </template>
 
 <style scoped>
