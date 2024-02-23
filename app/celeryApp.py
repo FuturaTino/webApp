@@ -14,10 +14,14 @@ from crud.captures import update_capture_status,STATUS
 
 
 load_dotenv(find_dotenv())
+username = os.environ.get("REDIS_USER")
+password = os.environ.get("REDIS_PASSWORD")
+host = os.environ.get("REDIS_HOST")
+port = os.environ.get("REDIS_PORT")
 
 app = Celery(__name__,  
-             broker='redis://localhost:6379/0',
-             backend='redis://localhost:6379/1')
+             broker=f'redis://{username}:{password}@{host}:{port}/0',
+             backend=f'redis://{username}:{password}@{host}:{port}/0')
 
 
 # celery settings from https://docs.celeryq.dev/en/stable/userguide/configuration.html
@@ -74,7 +78,7 @@ def process(self,uuid):
         raise Exception(f"{video_path} does't exist")
     image_dir  = storage_path /  "input"
     convert_video_to_images(video_path=video_path, image_dir=image_dir,num_frames_target=10,num_downscales=1)
-    # convert_images_to_colmap(source_path=storage_path,verbose=False)
+    convert_images_to_colmap(source_path=storage_path,verbose=False,no_gpu=False)
     try:
         pass
         # os.remove(video_path)
