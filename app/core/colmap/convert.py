@@ -234,53 +234,20 @@ def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=Tr
     except Exception as e:
         print(e)
 
-    if(resize):
-        print("Copying and resizing...")
-
-        # Define the source path as a Path object
-        source_path = Path(source_path)
-
-        # Resize images.
-        (source_path / "images_2").mkdir(exist_ok=True)
-        (source_path / "images_4").mkdir(exist_ok=True)
-        (source_path / "images_8").mkdir(exist_ok=True)
-
-        # Get the list of files in the source directory
-        files = os.listdir(source_path / "images")
-
-        # Copy each file from the source directory to the destination directory
-        for file in files:
-            source_file = source_path / "images" / file
-
-            destination_file = source_path / "images_2" / file
-            shutil.copy2(source_file, destination_file)
-            exit_code = os.system(f"{magick_command} mogrify -resize 50% {destination_file}")
-            if exit_code != 0:
-                logging.error(f"50% resize failed with code {exit_code}. Exiting.")
-                exit(exit_code)
-
-            destination_file = source_path / "images_4" / file
-            shutil.copy2(source_file, destination_file)
-            exit_code = os.system(f"{magick_command} mogrify -resize 25% {destination_file}")
-            if exit_code != 0:
-                logging.error(f"25% resize failed with code {exit_code}. Exiting.")
-                exit(exit_code)
-
-            destination_file = source_path / "images_8" / file
-            shutil.copy2(source_file, destination_file)
-            exit_code = os.system(f"{magick_command} mogrify -resize 12.5% {destination_file}")
-            if exit_code != 0:
-                logging.error(f"12.5% resize failed with code {exit_code}. Exiting.")
-                exit(exit_code)
-
     print("Done.")
 
 
 if __name__ =="__main__":
-
-    video_path = Path(rf'D:\Repo\webApp\app\storage\2f43fef3-b3e1-440c-b9de-7c269970e639\2f43fef3-b3e1-440c-b9de-7c269970e639.mp4')
+    import time
+    start = time.time()
+    video_path = Path(rf"/hy-tmp/eraLi/eraLi.mp4")
     dir = video_path.parent
     image_dir = dir / "input"
     # print(image_dir)
-    # # convert_video_to_images(video_path,image_dir,300,0)
-    convert_images_to_colmap(dir)
+    convert_video_to_images(video_path,image_dir,num_frames_target=350,num_downscales=0)
+    # 处理 input文件夹照片
+
+    # if
+    convert_images_to_colmap(dir,no_gpu=False,resize=False)
+    end = time.time()
+    print(f"用时 {(end - start)/60} 分钟")
