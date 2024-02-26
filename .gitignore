@@ -21,3 +21,4 @@ __pycache__
 .pytest_cache
 __pycache__/
 app/core/reconstruct/submodules/diff-gaussian-rasterization
+todo.md

@@ -5,7 +5,12 @@ import Capture  from './components/Capture.vue';
 </script>
 
 <template>
-  <Capture/>
+  
+  <RouterLink to="/register">Register</RouterLink>
+  <RouterLink to="/login"> Login</RouterLink>
+  <RouterLink to="/home"> Home</RouterLink>
+
+  <RouterView></RouterView>
 </template>
 
 <style scoped>

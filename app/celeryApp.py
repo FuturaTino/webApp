@@ -72,6 +72,7 @@ class gsTask(Task):
 
 @app.task(bind=True, time_limit=60*60,base=colmapTask) # bind=True 会将task(这里是customTask)实例作为第一个参数传入
 def process(self,uuid):
+    # 获取视频文件,放到storage_path
     storage_path = self.sotrage_dir / uuid
     video_path:Path = storage_path / f"{uuid}.mp4"
     if not video_path.exists():

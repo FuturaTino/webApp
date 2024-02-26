@@ -1,0 +1,59 @@
+[
+    {
+        "id":1,
+        "uuid":"jlkuios-gfddfgsw-jkldfsuoi-rjdsl34jl",
+        "title":"My First Capture",
+        "owner":"John Doe",
+        "time":"2021-01-01 12:00:00",
+        "image_url":"https://via.placeholder.com/150",
+        "result_url":"https://via.placeholder.com/300"
+    },
+    {
+        
+        "id":2,
+        "uuid":"jlkuios-gerttriw-jkldfsuoi-rjdsl34jl",
+        "title":"My Second Capture",
+        "owner":"Jane Doe",
+        "time":"2021-01-02 12:00:00",
+        "image_url":"https://via.placeholder.com/150",
+        "result_url":"https://via.placeholder.com/300"
+    },
+    {
+        "id":3,
+        "uuid":"wqeqweros-eljreiws-jkldfsuoi-rjdsl34jl",
+        "title":"My Third Capture",
+        "owner":"Bob Smith",
+        "time":"2021-01-03 12:00:00",
+        "image_url":"https://via.placeholder.com/150",
+        "result_url":"https://via.placeholder.com/300"
+    },
+    {
+        
+        "id":4,
+        "uuid":"jlkuios-gerttriw-jkldfsuoi-rjdsl34jl",
+        "title":"My Fourth Capture",
+        "owner":"Jane Doe",
+        "time":"2021-01-04 12:00:00",
+        "image_url":"https://via.placeholder.com/150",
+        "result_url":"https://via.placeholder.com/300"
+    },
+    {
+        "id":5,
+        "uuid":"wqeqweros-eljreiws-jkldfsuoi-rjdsl34jl",
+        "title":"My Fifth Capture",
+        "owner":"Bob Smith",
+        "time":"2021-01-05 12:00:00",
+        "image_url":"https://via.placeholder.com/150",
+        "result_url":"https://via.placeholder.com/300"
+    },
+    {
+        
+        "id":6,
+        "uuid":"jlkuios-gerttriw-jkldfsuoi-rjdsl34jl",
+        "title":"My Sixth Capture",
+        "owner":"Jane Doe",
+        "time":"2021-01-06 12:00:00",
+        "image_url":"https://via.placeholder.com/150",
+        "result_url":"https://via.placeholder.com/300"
+    }
+]

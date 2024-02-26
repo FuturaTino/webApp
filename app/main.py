@@ -19,6 +19,8 @@ templates = Jinja2Templates(directory="app/templates")
 origins = [
     "http://localhost:8000",  # Allow requests from this origin
     "http://127.0.0.1:8000",  # Also allow requests from this origin
+    "http://192.168.31.17:5173",
+    "*"
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -47,4 +49,4 @@ if __name__ == "__main__":
 
     # 检测是否有worker，是否有redis数据库
 
-    uvicorn.run("main:app", host="127.0.0.1",reload=True)
+    uvicorn.run("main:app", host="0.0.0.0",reload=True)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter,HTTPException,Depends, status ,Response
-
+from fastapi import Form
 from schemas.users import UserInDB, UserOutDB,LoginInDB,UserResponse
 from schemas.captures import CaptureInfo, CaptureStatus, CaptureReponse
 
@@ -15,11 +15,14 @@ from typing import List
 router = APIRouter()
 
 @router.post("/auth/register",tags=["Auth"])
-def register(user: UserInDB, db:Session = Depends(get_db)):
-    if get_user_by_email(db, email=user.email) is not None:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    elif get_user_by_username(db, username=user.username) is not None:
+def register(username: str = Form(...),
+            # email: str = Form(None),
+            password: str = Form(...),
+            db:Session = Depends(get_db)):
+    if get_user_by_username(db, username=username) is not None:
         raise HTTPException(status_code=400, detail="Username already registered")
+    # user = UserInDB(username=username, email="", password=get_password_hash(password))
+    user = UserInDB(username=username, email="", password=get_password_hash(password))
     db_user = create_user(db=db, user=user)
 
     return {
@@ -28,14 +31,13 @@ def register(user: UserInDB, db:Session = Depends(get_db)):
     }
 
 @router.post("/auth/login",tags=["Auth"])
-def login(user: LoginInDB, db:Session = Depends(get_db)):
-    db_user = get_user_by_email(db, email=user.email)
+def login(username: str = Form(...),password: str = Form(...), db:Session = Depends(get_db)):
+    db_user = get_user_by_username(db, username=username)
     if db_user is None:
-        db_user = get_user_by_username(db, username=user.username)
-        if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=400, detail="User not found")
         
-    if db_user.password != user.password:
+    # if db_user.password != get_password_hash(password) : 即使是相同的密码，由于盐的随机性，每次生成的哈希值也会不同。
+    if verify_password(password, db_user.password) == False: 
         raise HTTPException(status_code=400, detail="Password incorrect")
     
     access_token = create_access_token(username=db_user.username)
