@@ -59,14 +59,49 @@ def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:s
     return capture
 
 
+# @router.post("/captures/my/create",summary="在拥有token的前提下，该用户创建一个作品" )
+# async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
+#     uuid = str(uuid4())
+#     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     work_type = "reconstruction"
+#     slug = title + "-" + date
+#     db_user = get_user_by_username(db, username=current_username)
+#     video_location = Path(STORAGE_DIR) / uuid / f"{uuid}.mp4"
+
+#     # Create capture in db
+#     kwargs = {
+#         "uuid":uuid,
+#         "title":title,
+#         "slug":slug,
+#         "date":date,
+#         "work_type":work_type,
+#         "source_url":str(video_location),
+#         "result_url":None,
+#         "latest_run_status":None,
+#         "latest_run_current_stage":None,
+#         "owner_id":db_user.id
+#     }
+#     capture = CaptureInDB(**kwargs)
+#     create_capture(db=db, capture=capture,user_id=db_user.id)
+
+#     # Save the file
+#     if not video_location.parent.exists():
+#         video_location.parent.mkdir(parents=True)
+#     with open(video_location, "wb+") as file_object:
+#         file_object.write(await file.read())
+
+#     return {"filename": file.filename, "title": title,"uuid":uuid,"message":"File saved successfully"}
+
+# 上传文件到oss，这里只需要上传tittle到调度服务器即可，返回uuid。
+@router.post("/captures/my/create")
 @router.post("/captures/my/create",summary="在拥有token的前提下，该用户创建一个作品" )
-async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
+async def create_file(title:str = Form(),db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     uuid = str(uuid4())
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     work_type = "reconstruction"
     slug = title + "-" + date
     db_user = get_user_by_username(db, username=current_username)
-    video_location = Path(STORAGE_DIR) / uuid / f"{uuid}.mp4"
+    video_location = "video/" + f"{uuid}.mp4" # oss路径
 
     # Create capture in db
     kwargs = {
@@ -84,13 +119,7 @@ async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(
     capture = CaptureInDB(**kwargs)
     create_capture(db=db, capture=capture,user_id=db_user.id)
 
-    # Save the file
-    if not video_location.parent.exists():
-        video_location.parent.mkdir(parents=True)
-    with open(video_location, "wb+") as file_object:
-        file_object.write(await file.read())
-
-    return {"filename": file.filename, "title": title,"uuid":uuid,"message":"File saved successfully"}
+    return {"title": title,"uuid":uuid,"message":"File saved successfully"}
 
 @router.get("/captures/my/show", response_model=UserResponse,summary="在拥有token的前提下，获取当前用户的信息与所有作品")
 def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):

@@ -29,24 +29,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.get("/")
-def read_root():
-    return RedirectResponse("/my")
-
-@app.get("/login",tags=["webui"])
-def login(request:Request,db:Session = Depends(get_db)):
-    return templates.TemplateResponse("login.html", {"request": request})
-
-@app.get("/my",tags=["webui"])
-def read_root(request:Request,db:Session = Depends(get_db)):
-    captures = get_captures(db)
-    return templates.TemplateResponse("index.html", {"request": request,"captures": captures})
-
-
 
 if __name__ == "__main__":
     import uvicorn
 
     # 检测是否有worker，是否有redis数据库
 
-    uvicorn.run("main:app", host="0.0.0.0",reload=True)
+    uvicorn.run("main:app", host="0.0.0.0",port=8000,reload=True)

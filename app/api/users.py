@@ -14,41 +14,6 @@ from typing import List
 
 router = APIRouter()
 
-@router.post("/auth/register",tags=["Auth"])
-def register(username: str = Form(...),
-            # email: str = Form(None),
-            password: str = Form(...),
-            db:Session = Depends(get_db)):
-    if get_user_by_username(db, username=username) is not None:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    # user = UserInDB(username=username, email="", password=get_password_hash(password))
-    user = UserInDB(username=username, email="", password=get_password_hash(password))
-    db_user = create_user(db=db, user=user)
-
-    return {
-        "message":"User created successfully",
-        "user":UserOutDB(**db_user.__dict__)
-    }
-
-@router.post("/auth/login",tags=["Auth"])
-def login(username: str = Form(...),password: str = Form(...), db:Session = Depends(get_db)):
-    db_user = get_user_by_username(db, username=username)
-    if db_user is None:
-        raise HTTPException(status_code=400, detail="User not found")
-        
-    # if db_user.password != get_password_hash(password) : 即使是相同的密码，由于盐的随机性，每次生成的哈希值也会不同。
-    if verify_password(password, db_user.password) == False: 
-        raise HTTPException(status_code=400, detail="Password incorrect")
-    
-    access_token = create_access_token(username=db_user.username)
-
-    return {
-        "message":"Login successfully",
-        "user":UserOutDB(**db_user.__dict__),
-        "token": access_token
-    }
-
-
 @router.get("/users/all", response_model=List[UserResponse],summary="获取所有用户的信息")
 def read_users(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
     users = get_users(db, skip=skip, limit=limit)

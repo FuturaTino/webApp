@@ -12,10 +12,10 @@
         
         "id":2,
         "uuid":"jlkuios-gerttriw-jkldfsuoi-rjdsl34jl",
-        "title":"My Second Capture",
+        "title":"eraLi",
         "owner":"Jane Doe",
         "time":"2021-01-02 12:00:00",
-        "image_url":"https://via.placeholder.com/150",
+        "image_url":"http://192.168.31.17:5173/eraLi.png",
         "result_url":"https://via.placeholder.com/300"
     },
     {
