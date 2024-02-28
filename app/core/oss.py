@@ -138,8 +138,8 @@ if __name__ == '__main__':
 
     video_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if prepare_job(uuid):
-        print("准备工作成功")
+    # if prepare_job(uuid):
+    #     print("准备工作成功")
     # os.chmod(local_path.parent,os.stat(local_path.parent).st_mode | 0o777)
 
     # download_file(oss_key, rf"D:/Repo/webApp/app/storage/5b78cb1f-92b2-4021-9f8a-a60e442d9e7d/5b78cb1f-92b2-4021-9f8a-a60e442d9e7d.mp4")
@@ -162,3 +162,4 @@ if __name__ == '__main__':
     # 删除文件
     # if delete_oss_file(oss_image_key):
         # print("删除成功")
+    delete_local_dir(video_path.parent)
