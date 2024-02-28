@@ -22,27 +22,46 @@
 
 <script setup>
 import { UploadFilled } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, affixProps } from 'element-plus'
 import Capture from '@/components/Capture.vue';
 import captures from '@/data/captures.json';
-import {RouterView} from 'vue-router';
+import {RouterView,useRouter} from 'vue-router';
 import {ref} from 'vue';
 import Upload from '@/components/Upload.vue';
 import {v4 as uuidv4} from 'uuid';
 const uuid = uuidv4();
-console.log(uuid);
+import {instance as api} from '@/api/api';
+
+
 
 const visible = ref(false);
+const router = useRouter();
 
+const onWindowLoad = async () => {
+    // verify the token.
+    const token = localStorage.getItem("token");
+    const paramsString = `token=${token}`
+    const searchParams = new URLSearchParams(paramsString)
+    try {
+        const response = await api.get("/auth/token",{
+            params:{
+                token:token
+            },
 
-const fileUpload = (file) => {
-  console.log(file)
+        })
+        console.log(response);
+    } catch (error) {
+        console.log(error);
+        router.push('/login');
+    }
+
 }
 
-const handleBeforeUpload = (file) => {
-  console.log(file)
+onWindowLoad();
+
+window.onbeforeunload = ()=>{
+    localStorage.removeItem("token");
 }
-// verify the token.
 </script>
 
 <style scoped>
