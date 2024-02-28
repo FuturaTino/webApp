@@ -22,3 +22,4 @@ __pycache__
 __pycache__/
 app/core/reconstruct/submodules/diff-gaussian-rasterization
 todo.md
+node_modules

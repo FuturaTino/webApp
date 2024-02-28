@@ -111,6 +111,7 @@ async def create_file(title:str = Form(),uuid:str=Form(), db:Session = Depends(g
         "date":date,
         "work_type":work_type,
         "source_url":str(video_location),
+        "image_url":None,
         "result_url":None,
         "latest_run_status":None,
         "latest_run_current_stage":None,
@@ -119,7 +120,7 @@ async def create_file(title:str = Form(),uuid:str=Form(), db:Session = Depends(g
     capture = CaptureInDB(**kwargs)
     create_capture(db=db, capture=capture,user_id=db_user.id)
 
-    return {"title": title,"uuid":uuid,"message":"File saved successfully"}
+    return {"title": title,"uuid":uuid,"message":"Capture saved successfully"}
 
 @router.get("/captures/my/show", response_model=UserResponse,summary="在拥有token的前提下，获取当前用户的信息与所有作品")
 def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):

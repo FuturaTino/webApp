@@ -22,7 +22,7 @@ host = os.getenv("OSS_BUCKET_ENDPOINT")
 # callback_url为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
 callback_url = "http://127.0.0.1:8000/"
 # 用户上传文件时指定的前缀，不写则是根目录
-upload_dir = ''
+upload_dir = 'video/'
 expire_time = 1800 #注意过期时间，秒
 
 

@@ -12,6 +12,7 @@ class CaptureInfo(BaseModel):
     work_type: Union[str, None] = None
     date: Union[str, None] = None 
     source_url: Union[str, None] = None
+    image_url: Union[str, None] = None
     result_url: Union[str, None] = None
 
 class CaptureBase(BaseModel):
@@ -21,6 +22,7 @@ class CaptureBase(BaseModel):
     work_type: Union[str, None] = None 
     date: Union[str, None] = None
     source_url: Union[str, None] = None
+    image_url: Union[str, None] = None
     result_url: Union[str, None] = None
     latest_run_status: Union[str, None] = None
     latest_run_current_stage: Union[str, None] = None

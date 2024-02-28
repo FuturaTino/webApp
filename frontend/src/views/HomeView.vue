@@ -2,7 +2,9 @@
 <template>
 
 <h1>HomeView</h1>
+加载界面前要请求后端verify token
 <div class="container">
+    {{ uuid }}
     <Upload :visible="visible"/>
     <div class="search-box">
         <div>
@@ -26,7 +28,9 @@ import captures from '@/data/captures.json';
 import {RouterView} from 'vue-router';
 import {ref} from 'vue';
 import Upload from '@/components/Upload.vue';
-
+import {v4 as uuidv4} from 'uuid';
+const uuid = uuidv4();
+console.log(uuid);
 
 const visible = ref(false);
 
