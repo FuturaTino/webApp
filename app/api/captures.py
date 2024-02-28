@@ -92,11 +92,11 @@ def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:s
 
 #     return {"filename": file.filename, "title": title,"uuid":uuid,"message":"File saved successfully"}
 
-# 上传文件到oss，这里只需要上传tittle到调度服务器即可，返回uuid。
+# 先上传文件到oss,然后post调度服务器，上传formdata,title，uuid，返回成功信息后，前端再发送预训练和训练请求。
 @router.post("/captures/my/create")
 @router.post("/captures/my/create",summary="在拥有token的前提下，该用户创建一个作品" )
-async def create_file(title:str = Form(),db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
-    uuid = str(uuid4())
+async def create_file(title:str = Form(),uuid:str=Form(), db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
+    # uuid = str(uuid4())
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     work_type = "reconstruction"
     slug = title + "-" + date
