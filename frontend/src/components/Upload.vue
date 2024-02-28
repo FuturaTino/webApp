@@ -87,11 +87,13 @@ const handleAfterUpload = async ()=>{
   }
   const token = localStorage.getItem("token")
   const body = new URLSearchParams(formData)
-  const res = await api.post("captures/my/create",body,{
+  const response_create = await api.post("captures/my/create",body,{
       headers: {"Authorization": `Bearer ${token}`,
      'Content-Type': 'application/x-www-form-urlencoded'
     }
   })
+
+
 }
   
 </script>

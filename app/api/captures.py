@@ -144,8 +144,13 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
 
 # 暂无用户认证，用于admin测试，不可以公开api
 @router.post("/captures/process",summary="无需token,处理某个作品")
-def enqueued_capture(uuid:str, db:Session = Depends(get_db)):
+def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     try:
+        # 从oss中下载视频文件到本地storage目录
+        
+        # 截一张照片当封面
+
+        # 开启预处理，与训练模型
         # task link https://docs.celeryq.dev/en/stable/userguide/calling.html
         update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])
         process.apply_async(args=(uuid,),task_id=uuid,
