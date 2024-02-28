@@ -1,31 +1,15 @@
-<script setup>
-import Capture from '@/components/Capture.vue';
-import captures from '@/data/captures.json';
-import {RouterView} from 'vue-router';
-import {ref} from 'vue';
-import CreateCapture from "@/components/CreateCapture.vue";
-
-
-const show_Modal = ref(false);
-
-const toggleModal = () => {
-    show_Modal.value =!show_Modal.value;
-}
-
-// verify the token.
-</script>
 
 <template>
 
 <h1>HomeView</h1>
 <div class="container">
-    <CreateCapture v-if="show_Modal" @close="toggleModal()" @notShowModal="toggleModal()"/>
+    <Upload :visible="visible"/>
     <div class="search-box">
         <div>
             <label for="Search">Search:</label>
         <input type="text" id="Search" placeholder="Search..."/>
         </div>
-        <button id="create" class="create" @click="toggleModal()" >创建</button>
+        <el-button plain id="create" class="create" @click="visible=!visible" >创建</el-button>
     </div>
     <div class="list-box">
         <Capture v-for="capture in captures" :key="capture.id" :capture="capture"/>
@@ -33,6 +17,29 @@ const toggleModal = () => {
 
 </div>
 </template>
+
+<script setup>
+import { UploadFilled } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
+import Capture from '@/components/Capture.vue';
+import captures from '@/data/captures.json';
+import {RouterView} from 'vue-router';
+import {ref} from 'vue';
+import Upload from '@/components/Upload.vue';
+
+
+const visible = ref(false);
+
+
+const fileUpload = (file) => {
+  console.log(file)
+}
+
+const handleBeforeUpload = (file) => {
+  console.log(file)
+}
+// verify the token.
+</script>
 
 <style scoped>
     .container {

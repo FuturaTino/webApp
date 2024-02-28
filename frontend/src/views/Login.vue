@@ -21,7 +21,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import api from "@/api/api"
+import {instance as api} from "@/api/api"
 
 const router = useRouter();
 const form = ref({
