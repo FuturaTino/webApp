@@ -26,8 +26,8 @@ load_dotenv(find_dotenv('.env'))
 backend_dir = Path(__file__).parent.parent
 STORAGE_DIR = backend_dir / os.getenv("STORAGE_DIR")
 
-@router.get("/captures/all", response_model=List[CaptureReponse],summary="获取所有作品的信息")
-def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
+@router.get("/captures/all", response_model=List[CaptureReponse],summary="需要token，获取所有公开作品的信息，但目前还没有对每个作品添加公开标志")
+def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     db_captures = get_captures(db, skip=skip, limit=limit)
     
     captures_out_db = list(map(lambda capture: CaptureOutDB(**capture.__dict__), db_captures))
@@ -43,7 +43,7 @@ def read_captures(skip:int = 0, limit:int = 100, db:Session = Depends(get_db)):
 
     return response
 
-@router.get("/captures/{capture_id}", response_model=CaptureReponse,summary="根据作品id,获取所有作品中某个作品的信息")
+@router.get("/captures/{capture_id}", response_model=CaptureReponse,summary="需要token,根据作品id,获取所有作品中某个作品的信息")
 def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     db_capture = get_capture(db, capture_id=capture_id)
     if db_capture is None:
@@ -58,43 +58,8 @@ def read_capture(capture_id:int, db:Session = Depends(get_db),current_username:s
     capture = CaptureReponse(id=id, info=info, status=status, owner_id=owner_id)
     return capture
 
-
-# @router.post("/captures/my/create",summary="在拥有token的前提下，该用户创建一个作品" )
-# async def create_file(file: UploadFile, title:str = Form(),db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
-#     uuid = str(uuid4())
-#     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#     work_type = "reconstruction"
-#     slug = title + "-" + date
-#     db_user = get_user_by_username(db, username=current_username)
-#     video_location = Path(STORAGE_DIR) / uuid / f"{uuid}.mp4"
-
-#     # Create capture in db
-#     kwargs = {
-#         "uuid":uuid,
-#         "title":title,
-#         "slug":slug,
-#         "date":date,
-#         "work_type":work_type,
-#         "source_url":str(video_location),
-#         "result_url":None,
-#         "latest_run_status":None,
-#         "latest_run_current_stage":None,
-#         "owner_id":db_user.id
-#     }
-#     capture = CaptureInDB(**kwargs)
-#     create_capture(db=db, capture=capture,user_id=db_user.id)
-
-#     # Save the file
-#     if not video_location.parent.exists():
-#         video_location.parent.mkdir(parents=True)
-#     with open(video_location, "wb+") as file_object:
-#         file_object.write(await file.read())
-
-#     return {"filename": file.filename, "title": title,"uuid":uuid,"message":"File saved successfully"}
-
-# 先上传文件到oss,然后post调度服务器，上传formdata,title，uuid，返回成功信息后，前端再发送预训练和训练请求。
-@router.post("/captures/my/create")
-@router.post("/captures/my/create",summary="在拥有token的前提下，该用户创建一个作品" )
+# 先上传文件到oss,然后post调度服务器，上传formdata,title，uuid,返回成功信息后，前端再发送预训练和训练请求。
+@router.post("/captures/my/create",summary="在拥有token的前提下,该用户创建一个作品" )
 async def create_file(title:str = Form(),uuid:str=Form(), db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     # uuid = str(uuid4())
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -142,8 +107,8 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
     # response = UserOutDB(**db_user.__dict__)
     return response
 
-# 暂无用户认证，用于admin测试，不可以公开api
-@router.post("/captures/process",summary="无需token,处理某个作品")
+
+@router.post("/captures/process",summary="需要token，将某个作品加入队列")
 def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     try:
         # 从oss中下载视频文件到本地storage目录
@@ -168,8 +133,8 @@ def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str
 
     return {"message":f"{uuid} is queued for processing"}
 
-@router.post("/captures/train",summary="无需token,训练某个作品")
-def train_capture(uuid:str, db:Session = Depends(get_db)):
+@router.post("/captures/train",summary="需要token,在预处理前提上，训练模型")
+def train_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     try:
         # train.apply_async((uuid,),task_id=uuid)
         pass # 训练功能暂未实现
@@ -181,20 +146,19 @@ def train_capture(uuid:str, db:Session = Depends(get_db)):
     
     return {"message":f"{uuid} is reconstructing"}
 
-@router.post("/captures/refresh",summary="无需token,刷新某个作品的状态")
+@router.post("/captures/refresh",summary="无需token,刷新某个作品的状态至最原始创建状态")
 def refresh_capture(uuid:str, db:Session = Depends(get_db)):
     return {"message":"refresh capture"}
 
-@router.delete("/captures/delete",summary="无需token,删除某个作品")
-def delete_capture(uuid:str, db:Session = Depends(get_db)):
+@router.delete("/captures/delete",summary="需要token,删除某个作品")
+def delete_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     try:
-        shutil.rmtree(STORAGE_DIR / uuid)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=e)
-    try:
+        work_dir = STORAGE_DIR / uuid
+        if work_dir.exists():
+            shutil.rmtree(work_dir)
+
         delete_a_capture(db=db, uuid=uuid)
-        return {"message":"delete capture"}
+        return {"message":"deleted capture"}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=e)
