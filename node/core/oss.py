@@ -65,8 +65,9 @@ def delete_oss_file(oss_key):
 def delete_local_dir(local_dir):
     import shutil
     try:
-        shutil.rmtree(local_dir) 
-        return True 
+        if local_dir.exists():
+            shutil.rmtree(local_dir) 
+            return True 
     except Exception as e:
         print(e)
         raise e 

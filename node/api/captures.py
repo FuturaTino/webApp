@@ -110,13 +110,7 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
 @router.post("/captures/process",summary="需要token，将某个作品加入队列")
 def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     try:
-        # 从oss中下载视频文件到本地storage目录
-        try:
-            prepare_job(uuid)
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail=e)
-        
+
         # 开启预处理，与训练模型
         # task link https://docs.celeryq.dev/en/stable/userguide/calling.html
         update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])

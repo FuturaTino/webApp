@@ -8,8 +8,9 @@ import shutil
 from kombu import Queue
 from core.colmap.convert import convert_video_to_images,convert_images_to_colmap
 from core.dependencies import get_db
-from core.oss import upload_file
+from core.oss import upload_file,prepare_job,delete_local_dir
 from core.reconstruct.train import training
+
 from crud.captures import update_capture_status,STATUS
 
 
@@ -27,7 +28,6 @@ app = Celery(__name__,
 
 # celery settings from https://docs.celeryq.dev/en/stable/userguide/configuration.html
 app.conf.broker_connection_retry_on_startup = True
-
 # About routes https://docs.celeryq.dev/en/stable/userguide/routing.html
 # app.conf.task_default_exchange = 'default'
 # app.conf.task_default_queue = 'default'
@@ -43,8 +43,15 @@ class colmapTask(Task):
         self.sotrage_dir = root_dir / Path(os.environ.get('STORAGE_DIR'))   
 
     def before_start(self, task_id, args, kwargs):
+
         update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['PreProcessing'])
-        print(f"Task: {task_id},Status: {STATUS['PreProcessing']}")
+        try:
+            prepare_job(uuid=task_id)
+            print(f"Task: {task_id},Status: {STATUS['PreProcessing']}")
+        except Exception as e:
+            update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
+            print(f"Task: {task_id},Status: {STATUS['Failed']}")
+            raise e
 
     def on_success(self, retval, task_id, args, kwargs):
         update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Queue_2'])
@@ -64,9 +71,15 @@ class gsTask(Task):
         print(f"Task: {task_id},Status: {STATUS['Reconstructing']}")
 
     def on_success(self, retval, task_id, args, kwargs):
-        update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
-        print(f"Task: {task_id},Status: {STATUS['Success']} ✅ ")
-
+        try:
+            work_dir = Path(os.getenv('STORAGE_DIR')) / task_id
+            delete_local_dir(work_dir)
+            update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
+            print(f"Task: {task_id},Status: {STATUS['Success']} ✅ ")
+        except Exception as e:
+            update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
+            raise e
+        
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
         print(f"Task: {task_id},Status: {STATUS['Failed']}")
@@ -99,6 +112,7 @@ def reconstruct(self,uuid):
         raise Exception(f"{ply_path} does't exist")
     oss_ply_key = "ply/" + uuid + ".ply"
     upload_file(oss_key=oss_ply_key, local_file=str(ply_path))
+
 
     
 
