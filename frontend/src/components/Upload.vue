@@ -92,8 +92,6 @@ const handleAfterUpload = async ()=>{
      'Content-Type': 'application/x-www-form-urlencoded'
     }
   })
-
-
 }
   
 </script>
