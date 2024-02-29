@@ -81,19 +81,36 @@ const fileUpload = async (option) => {
 }
 
 const handleAfterUpload = async ()=>{
+
   const formData ={
     "title": title.value,
     "uuid": uuid.value,
   }
+  console.log("formData",formData)
+
   const token = localStorage.getItem("token")
+
+  // Post调度服务器，创建Capture
   const body = new URLSearchParams(formData)
   const response_create = await api.post("captures/my/create",body,{
       headers: {"Authorization": `Bearer ${token}`,
      'Content-Type': 'application/x-www-form-urlencoded'
     }
   })
+  console.log("response_create",response_create)
+ 
+  // Post调度服务器，处理Capture
+  if (response_create.status === 200){
+    const response_process = await api.post("captures/process",null,{
+      params:{
+        uuid: uuid.value,
+      },
+      headers:{"Authorization": `Bearer ${token}`},
+    })
+  }
 }
-  
+
+
 </script>
 
 <style scoped>

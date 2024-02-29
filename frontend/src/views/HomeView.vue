@@ -59,9 +59,6 @@ const onWindowLoad = async () => {
 
 onWindowLoad();
 
-window.onbeforeunload = ()=>{
-    localStorage.removeItem("token");
-}
 </script>
 
 <style scoped>
