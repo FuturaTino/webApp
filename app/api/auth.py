@@ -3,7 +3,7 @@ from fastapi import Form
 from schemas.users import UserInDB, UserOutDB,LoginInDB,UserResponse
 from schemas.captures import CaptureInfo, CaptureStatus, CaptureReponse
 
-from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_users
+from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_a_user
 from crud.captures import get_user_captures
 
 from core.auth import create_access_token, verify_password, get_password_hash,get_current_user,verify_token

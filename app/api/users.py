@@ -3,7 +3,7 @@ from fastapi import Form
 from schemas.users import UserInDB, UserOutDB,LoginInDB,UserResponse
 from schemas.captures import CaptureInfo, CaptureStatus, CaptureReponse
 
-from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_users
+from crud.users import get_users, get_user, get_user_by_email, get_user_by_username, create_user, delete_a_user
 from crud.captures import get_user_captures
 
 from core.auth import create_access_token, verify_password, get_password_hash,get_current_user
@@ -59,4 +59,4 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
 
 @router.delete("/users/{user_id}",summary="删除当前用户的信息")
 def delete_users(user_id:int, db:Session = Depends(get_db)):
-    return delete_users(db=db,user_id=user_id)
+    return delete_a_user(db=db,user_id=user_id)

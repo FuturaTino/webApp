@@ -12,7 +12,7 @@ def create_user(db:Session, user: UserInDB):
     db.refresh(db_user)
     return db_user 
 
-def delete_users(db:Session, user_id:int):
+def delete_a_user(db:Session, user_id:int):
     db_user = db.query(User).filter(User.id == user_id).first()
     db_user_captures = db.query(Capture).filter(Capture.owner_id == user_id)
     if db_user is not None:

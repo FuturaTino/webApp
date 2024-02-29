@@ -32,6 +32,7 @@ app.conf.broker_connection_retry_on_startup = True
 # app.conf.task_default_exchange = 'default'
 # app.conf.task_default_queue = 'default'
 app.conf.task_default_exchange_type = 'fanout' # 广播模式
+app.conf.worker_concurrency = 2
 app.conf.task_queues = (
     Queue('colmap', routing_key='colmap.low'), # exchange:实体交换机 ；交换机中的routing_key 永远区分 一个celery中的多个队列（优先级）
     Queue('gs', routing_key='gs.low')
