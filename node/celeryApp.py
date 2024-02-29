@@ -75,8 +75,8 @@ class gsTask(Task):
         try:
             work_dir = Path(os.getenv('STORAGE_DIR')) / task_id
             delete_local_dir(work_dir)
-            image_url = get_oss_image_url(uuid=task_id)
-            ply_url = get_oss_ply_url(uuid=task_id)
+            image_url = get_oss_image_url(object=task_id)
+            ply_url = get_oss_ply_url(object_name=task_id)
             update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
             update_capture_info(db=next(get_db()),uuid=task_id,image_url=image_url,ply_url=ply_url)
             print(f"Task: {task_id},Status: {STATUS['Success']} ✅ ")
