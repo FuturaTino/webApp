@@ -12,7 +12,7 @@ from hashlib import sha1 as sha
 import httpserver
 import os 
 from dotenv import load_dotenv,find_dotenv
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv("config.env"))
 # 请填写您的AccessKeyId。
 access_key_id = os.getenv("OSS_ACCESS_KEY_ID")
 # 请填写您的AccessKeySecret。

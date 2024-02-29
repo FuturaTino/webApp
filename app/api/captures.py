@@ -21,7 +21,7 @@ from pathlib import Path
 import shutil
 
 router = APIRouter()
-load_dotenv(find_dotenv('.env'))
+load_dotenv(find_dotenv('config.env'))
 backend_dir = Path(__file__).parent.parent
 STORAGE_DIR = backend_dir / os.getenv("STORAGE_DIR")
 

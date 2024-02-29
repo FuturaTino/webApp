@@ -6,7 +6,7 @@ import psycopg2
 from dotenv import load_dotenv,find_dotenv
 import os 
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv("config.env"))
 BASE_DIR = Path(__file__).resolve().parent # webApp\app\db
 username = os.getenv("POSTGRES_USER")
 password = os.getenv("POSTGRES_PASSWORD")

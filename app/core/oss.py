@@ -4,7 +4,7 @@ import os
 from oss2.credentials import EnvironmentVariableCredentialsProvider
 from dotenv import load_dotenv, find_dotenv
 from pathlib import Path 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv("config.env"))
 # 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录RAM控制台创建RAM账号。
 endpoint = os.getenv("OSS_ENDPOINT")
 bucket_name = os.getenv("OSS_BUCKET_NAME")

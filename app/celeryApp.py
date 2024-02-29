@@ -14,7 +14,7 @@ from crud.captures import update_capture_status,STATUS
 
 
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv("config.env"))
 username = os.environ.get("REDIS_USER")
 password = os.environ.get("REDIS_PASSWORD")
 host = os.environ.get("REDIS_HOST")
@@ -97,7 +97,7 @@ def reconstruct(self,uuid):
     # 将重建结果文件上传oss
     if not ply_path.exists():
         raise Exception(f"{ply_path} does't exist")
-    oss_ply_key = "video/" + uuid + ".ply"
+    oss_ply_key = "ply/" + uuid + ".ply"
     upload_file(oss_key=oss_ply_key, local_file=str(ply_path))
 
     
