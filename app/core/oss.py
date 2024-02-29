@@ -51,6 +51,7 @@ def upload_file(oss_key, local_path):
         bucket.put_object_from_file(oss_key, local_path)  
         return True  
     except Exception as e:
+
         print(e)
         raise e 
     
