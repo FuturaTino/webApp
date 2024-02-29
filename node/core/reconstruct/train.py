@@ -119,8 +119,8 @@ def training(source_path:Path,model_path:Path,uuid:str,debug_from:int=None, savi
         loss.backward()
         with torch.no_grad():
             ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
-            if iteration % 10 == 0:
-                print(f"[ITER {iteration}] Loss: {ema_loss_for_log:.{7}f}",end="\r")
+            if iteration % 5000 == 0:
+                print(f"[ITER {iteration}/30000]:{uuid} Loss: {ema_loss_for_log:.{7}f}",end="\r")
 
             # Densification
             if iteration < opt.densify_until_iter:
@@ -147,6 +147,7 @@ def training(source_path:Path,model_path:Path,uuid:str,debug_from:int=None, savi
         if (iteration in saving_iterations):
             print("\n[ITER {}] Saving Gaussians".format(iteration))
             scene.save(iteration,uuid=uuid) 
+        torch.cuda.empty_cache()
 
 def get_resolution_factor(iteration):
         # iters [0,249] 8; [250,499] 4; [500,749] 2; [750,end] -1  
