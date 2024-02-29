@@ -135,8 +135,12 @@ def get_oss_image_url(object_name,dir="image/",expires=3600,postfix=".png"):
     oss_image_key = dir + object_name + postfix
     if not isinstance(oss_image_key, str):
         oss_image_key = str(oss_image_key)
-    url = bucket.sign_url('GET',key=oss_image_key,expires=expires,slash_safe=True)
-    return url 
+    try:
+        url = bucket.sign_url('GET',key=oss_image_key,expires=expires,slash_safe=True)
+        return url
+    except Exception as e:
+        return None 
+        raise e
 
 def get_oss_ply_url(object_name,dir="ply/",expires=3600,postfix=".ply"):
     """
@@ -153,8 +157,13 @@ def get_oss_ply_url(object_name,dir="ply/",expires=3600,postfix=".ply"):
     oss_ply_key = dir + object_name + postfix
     if not isinstance(oss_ply_key, str):
         oss_ply_key = str(oss_ply_key)
-    url = bucket.sign_url('GET',key=oss_ply_key,expires=expires,slash_safe=True)
-    return url 
+    try:
+        url = bucket.sign_url('GET',key=oss_ply_key,expires=expires,slash_safe=True)
+        return url 
+    except Exception as e:
+        return None 
+        raise e 
+    
 
     
 if __name__ == '__main__':

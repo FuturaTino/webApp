@@ -16,6 +16,9 @@ STATUS = {
 def get_capture(db:Session, capture_id:int):
     return db.query(Capture).filter(Capture.id == capture_id).first()
 
+def get_capture_by_uuid(db:Session, uuid:str):
+    return db.query(Capture).filter(Capture.uuid == uuid).first()
+
 def get_captures(db:Session, skip:int = 0, limit: int = 100):
     return db.query(Capture).offset(skip).limit(limit).all()
 
@@ -51,8 +54,8 @@ def update_capture_status(db:Session, uuid:str, status:CaptureStatus):
         return {"message": "Capture not found"}
 
 
-def update_capture_info(db:Session, task_id:str,image_url:str, result_url:str):
-    db_capture = db.query(Capture).filter(Capture.uuid == task_id).first()
+def update_capture_info(db:Session, uuid:str,image_url:str, result_url:str):
+    db_capture = db.query(Capture).filter(Capture.uuid == uuid).first()
     if db_capture is not None:
         db_capture.image_url = image_url
         db_capture.result_url = result_url 

@@ -4,7 +4,7 @@ from schemas.captures import CaptureOutDB,CaptureReponse
 
 
 class UserBase(BaseModel):
-    email: str
+    email: str = None
     username:str
 
 class UserInDB(UserBase):
