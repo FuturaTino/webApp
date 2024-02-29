@@ -27,6 +27,8 @@ app = Celery(__name__,
 
 # celery settings from https://docs.celeryq.dev/en/stable/userguide/configuration.html
 app.conf.broker_connection_retry_on_startup = True
+app.conf.worker_max_tasks_per_child = 2 # Worker在执行n个任务杀掉子进程再启动新的子进程，可以防止内存泄露。
+app.conf.worker_concurrency = 2
 # About routes https://docs.celeryq.dev/en/stable/userguide/routing.html
 # app.conf.task_default_exchange = 'default'
 # app.conf.task_default_queue = 'default'
