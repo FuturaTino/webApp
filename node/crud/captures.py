@@ -50,10 +50,11 @@ def update_capture_status(db:Session, uuid:str, status:CaptureStatus):
     else:
         return {"message": "Capture not found"}
 
-def update_capture_info(db:Session, task_id:str,source_url:str, result_url:str):
+
+def update_capture_info(db:Session, task_id:str,image_url:str, result_url:str):
     db_capture = db.query(Capture).filter(Capture.uuid == task_id).first()
     if db_capture is not None:
-        db_capture.source_url = source_url
+        db_capture.image_url = image_url
         db_capture.result_url = result_url 
         db.commit()
         db.refresh(db_capture)

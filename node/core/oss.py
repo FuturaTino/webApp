@@ -121,55 +121,44 @@ def prepare_job(uuid:str):
         print(e)
         raise e 
 
-def get_oss_image_url(oss_image_key,expire=600):
+def get_oss_image_url(object_name,dir="image/",expires=3600,postfix=".png"):
     """
     获取 OSS 图片的 URL,用于分享。
 
     参数：
-    oss_image_key: str，OSS 图片的路径。
-    expire: int，URL 有效期，单位为秒。
+    object_name: str,OSS 对象名，例如 "{uuid}"。
+    expire: int, URL有效期,单位为秒。RAM用户分享最多3600秒
 
     返回：
     str，OSS 图片的 URL。
     """
+    oss_image_key = dir + object_name + postfix
     if not isinstance(oss_image_key, str):
         oss_image_key = str(oss_image_key)
-    url = "https://" + bucket_name + "." + endpoint + "/" + oss_image_key
+    url = bucket.sign_url('GET',key=oss_image_key,expires=expires,slash_safe=True)
     return url 
+
+def get_oss_ply_url(object_name,dir="ply/",expires=3600,postfix=".ply"):
+    """
+    获取 OSS ply 文件的 URL,用于分享。
+
+
+    参数：
+    object_name: str,OSS 对象名，例如 "{uuid}"。
+    expire: int, URL有效期,单位为秒。RAM用户分享最多3600秒
+
+    返回：
+    url :OSS ply 文件的 URL。
+    """
+    oss_ply_key = dir + object_name + postfix
+    if not isinstance(oss_ply_key, str):
+        oss_ply_key = str(oss_ply_key)
+    url = bucket.sign_url('GET',key=oss_ply_key,expires=expires,slash_safe=True)
+    return url 
+
+    
 if __name__ == '__main__':
-
-    oss_key = "video/"
-    storage_dir = Path(os.getenv("STORAGE_DIR")) #相对于app目录
-    uuid =  "5b78cb1f-92b2-4021-9f8a-a60e442d9e7d"
-    file_name = uuid + ".mp4"
-    oss_key = oss_key + file_name
-    
-    video_path = storage_dir / uuid / file_name
-
-    video_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # if prepare_job(uuid):
-    #     print("准备工作成功")
-    # os.chmod(local_path.parent,os.stat(local_path.parent).st_mode | 0o777)
-
-    # download_file(oss_key, rf"D:/Repo/webApp/app/storage/5b78cb1f-92b2-4021-9f8a-a60e442d9e7d/5b78cb1f-92b2-4021-9f8a-a60e442d9e7d.mp4")
-    # download_file(oss_key, str(local_path))
-
-    # 截图
-    # image_path = video_path.parent / (uuid + ".png")
-
-    # try:
-    #     subprocess.run(["ffmpeg", "-i", video_path, "-ss", "00:00:59", "-vframes", "1", image_path])
-    # except Exception as e:
-    #     print(e)
-    #     raise e 
-    
-    # 上传文件
-    # oss_image_key = "image/" + uuid + ".png"
-    # if upload_file(oss_image_key, image_path):
-    #     print("上传成功")
-
-    # 删除文件
-    # if delete_oss_file(oss_image_key):
-        # print("删除成功")
-    delete_local_dir(video_path.parent)
+    for i in range(100):
+        url = get_oss_image_url("336b6ca2-f556-4d2f-ba83-e4a7ed91e59f")
+        print(url)
+    pass 

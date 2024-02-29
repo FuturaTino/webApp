@@ -8,12 +8,11 @@ import shutil
 from kombu import Queue
 from core.colmap.convert import convert_video_to_images,convert_images_to_colmap
 from core.dependencies import get_db
-from core.oss import upload_file,prepare_job,delete_local_dir
+from core.oss import upload_file,prepare_job,delete_local_dir,get_oss_image_url,get_oss_ply_url
 from core.reconstruct.train import training
 
-from crud.captures import update_capture_status,STATUS
+from crud.captures import update_capture_status,STATUS,update_capture_info
 import torch 
-
 
 load_dotenv(find_dotenv("config.env"))
 username = os.environ.get("REDIS_USER")
@@ -75,7 +74,10 @@ class gsTask(Task):
         try:
             work_dir = Path(os.getenv('STORAGE_DIR')) / task_id
             delete_local_dir(work_dir)
+            image_url = get_oss_image_url(uuid=task_id)
+            ply_url = get_oss_ply_url(uuid=task_id)
             update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
+            update_capture_info(db=next(get_db()),uuid=task_id,image_url=image_url,ply_url=ply_url)
             print(f"Task: {task_id},Status: {STATUS['Success']} ✅ ")
         except Exception as e:
             update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
