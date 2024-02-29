@@ -4,6 +4,7 @@ import os
 from oss2.credentials import EnvironmentVariableCredentialsProvider
 from dotenv import load_dotenv, find_dotenv
 from pathlib import Path 
+import subprocess 
 load_dotenv(find_dotenv("config.env"))
 # 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录RAM控制台创建RAM账号。
 endpoint = os.getenv("OSS_ENDPOINT")
@@ -22,6 +23,9 @@ def download_file(oss_key, local_path):
     if not isinstance(local_path, str):
         local_path = str(local_path)
     try:
+        # 如果文件存在且文件大小不为0kb,则不下载
+        if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
+            return True
         bucket.get_object_to_file(oss_key, local_path)    
     except Exception as e:
         print(e)
@@ -128,7 +132,7 @@ def get_oss_image_url(oss_image_key,expire=600):
     url = "https://" + bucket_name + "." + endpoint + "/" + oss_image_key
     return url 
 if __name__ == '__main__':
-    import subprocess 
+
     oss_key = "video/"
     storage_dir = Path(os.getenv("STORAGE_DIR")) #相对于app目录
     uuid =  "5b78cb1f-92b2-4021-9f8a-a60e442d9e7d"

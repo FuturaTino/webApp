@@ -23,7 +23,7 @@ port = os.environ.get("REDIS_PORT")
 
 app = Celery(__name__,  
              broker=f'redis://{username}:{password}@{host}:{port}/0',
-             backend=f'redis://{username}:{password}@{host}:{port}/0')
+             backend=f'redis://{username}:{password}@{host}:{port}/1')
 
 
 # celery settings from https://docs.celeryq.dev/en/stable/userguide/configuration.html
