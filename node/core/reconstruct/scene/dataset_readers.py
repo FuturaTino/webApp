@@ -68,10 +68,10 @@ def getNerfppNorm(cam_info):  # 统计scene的范围,提供了NeRF训练所需�
 def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
     cam_infos = []
     for idx, key in enumerate(cam_extrinsics):
-        sys.stdout.write('\r')
+        # sys.stdout.write('\r')
         # the exact output you're looking for:
-        sys.stdout.write("Reading camera {}/{}".format(idx+1, len(cam_extrinsics)))
-        sys.stdout.flush()
+        # sys.stdout.write("Reading camera {}/{}".format(idx+1, len(cam_extrinsics)))
+        # sys.stdout.flush()
 
         extr = cam_extrinsics[key]
         intr = cam_intrinsics[extr.camera_id]
@@ -158,7 +158,7 @@ def readColmapSceneInfo(path, images, eval, llffhold=8):
     bin_path = os.path.join(path, "sparse/0/points3D.bin")
     txt_path = os.path.join(path, "sparse/0/points3D.txt")
     if not os.path.exists(ply_path):
-        print("Converting point3d.bin to .ply, will happen only the first time you open the scene.")
+        # print("Converting point3d.bin to .ply, will happen only the first time you open the scene.")
         try:
             xyz, rgb, _ = read_points3D_binary(bin_path)
         except:
