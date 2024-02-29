@@ -38,7 +38,12 @@ def get_frame(video_path,image_path):
         video_path = str(video_path)
 
     try:
+        # 如果文件存在且文件大小不为0kb,则不截图
+        
+        if os.path.exists(image_path) and os.path.getsize(image_path) > 0:
+            return True 
         subprocess.run(["ffmpeg",'-loglevel', 'error', "-i", video_path, "-ss", "00:00:59", "-vframes", "1", image_path])
+        return True
     except Exception as e:
         print(e)
         raise e 
@@ -51,9 +56,6 @@ def upload_file(oss_key, local_path):
     if not isinstance(local_path, str):
         local_path = str(local_path)
     try:
-        # 如果文件存在且文件大小不为0kb,则不上传
-        if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
-            return True
         bucket.put_object_from_file(oss_key, local_path)  
         return True  
     except Exception as e:
