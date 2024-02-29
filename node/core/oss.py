@@ -51,6 +51,9 @@ def upload_file(oss_key, local_path):
     if not isinstance(local_path, str):
         local_path = str(local_path)
     try:
+        # 如果文件存在且文件大小不为0kb,则不上传
+        if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
+            return True
         bucket.put_object_from_file(oss_key, local_path)  
         return True  
     except Exception as e:

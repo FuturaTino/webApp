@@ -105,7 +105,7 @@ def process(self,uuid):
 def reconstruct(self,uuid):
     storage_dir = Path(os.getenv('STORAGE_DIR'))
     work_dir = storage_dir / uuid
-    ply_path = storage_dir / uuid / uuid+'.ply'
+    ply_path = storage_dir / uuid / (uuid+'.ply')
     training(source_path=work_dir,model_path=work_dir,uuid=uuid,saving_iterations=[30000])
     # 将重建结果文件上传oss
     if not ply_path.exists():
