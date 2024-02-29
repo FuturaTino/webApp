@@ -12,14 +12,14 @@
 import os
 import torch
 from random import randint
-from utils.loss_utils import l1_loss, ssim
-from gaussian_renderer import render, network_gui
+from core.reconstruct.utils.loss_utils import l1_loss, ssim
+from core.reconstruct.gaussian_renderer import render, network_gui
 import sys
-from scene import Scene, GaussianModel
-from utils.general_utils import safe_state
+from core.reconstruct.scene import Scene, GaussianModel
+from core.reconstruct.utils.general_utils import safe_state
 import uuid
 from tqdm import tqdm
-from utils.image_utils import psnr
+from core.reconstruct.utils.image_utils import psnr
 from argparse import ArgumentParser, Namespace
 
 from pathlib import Path 

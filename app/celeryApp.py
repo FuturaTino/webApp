@@ -79,7 +79,7 @@ def process(self,uuid):
     if not video_path.exists():
         raise Exception(f"{video_path} does't exist")
     image_dir  = storage_path /  "input"
-    convert_video_to_images(video_path=video_path, image_dir=image_dir,num_frames_target=10,num_downscales=1)
+    convert_video_to_images(video_path=video_path, image_dir=image_dir,num_frames_target=320,num_downscales=1)
     convert_images_to_colmap(source_path=storage_path,verbose=False,no_gpu=False)
     try:
         pass

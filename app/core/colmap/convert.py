@@ -236,8 +236,7 @@ def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=Tr
 
     print("Done.")
 
-
-if __name__ =="__main__":
+def testing():
     import time
     start = time.time()
     video_path = Path(rf"/hy-tmp/eraLi/eraLi.mp4")
@@ -250,4 +249,6 @@ if __name__ =="__main__":
     # if
     convert_images_to_colmap(dir,no_gpu=False,resize=False)
     end = time.time()
-    print(f"用时 {(end - start)/60} 分钟")
+    print(f"用时 {(end - start)/60} 分钟")    
+if __name__ =="__main__":
+    pass
