@@ -8,9 +8,8 @@ from crud.users import get_user_by_username
 
 from core.dependencies import get_db
 from core.auth import get_current_user
-
+from core.oss import prepare_job
 from celeryApp import process,reconstruct
-
 
 from sqlalchemy.orm import Session
 from typing import List 
@@ -112,9 +111,12 @@ def read_user(db:Session = Depends(get_db),current_username:str = Depends(get_cu
 def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
     try:
         # 从oss中下载视频文件到本地storage目录
+        try:
+            prepare_job(uuid)
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail=e)
         
-        # 截一张照片当封面
-
         # 开启预处理，与训练模型
         # task link https://docs.celeryq.dev/en/stable/userguide/calling.html
         update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])

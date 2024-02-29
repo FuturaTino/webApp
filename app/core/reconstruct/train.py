@@ -71,8 +71,9 @@ dataset = ModelParams()
 opt = OptimizationParams()
 pipe = PipelineParams()
 
-def training(source_path:Path,model_path:Path,debug_from:int=None, saving_iterations:list=[7000,30000]):
+def training(source_path:Path,model_path:Path,uuid:str,debug_from:int=None, saving_iterations:list=[7000,30000]):
     """
+    source_path: 原始图像文件夹路径
     model_path: 保存该模型的文件夹路径
     """
     try:
@@ -145,7 +146,7 @@ def training(source_path:Path,model_path:Path,debug_from:int=None, saving_iterat
         
         if (iteration in saving_iterations):
             print("\n[ITER {}] Saving Gaussians".format(iteration))
-            scene.save(iteration) 
+            scene.save(iteration,uuid=uuid) 
 
 def get_resolution_factor(iteration):
         # iters [0,249] 8; [250,499] 4; [500,749] 2; [750,end] -1  
