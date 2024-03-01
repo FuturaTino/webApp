@@ -29,6 +29,8 @@ app = Celery(__name__,
 app.conf.broker_connection_retry_on_startup = True
 app.conf.worker_max_tasks_per_child = 1 # PoolWorker子进程在执行1个任务后重启，可以防止内存泄露。
 app.conf.worker_concurrency = 2
+app.conf.task_soft_time_limit=None 
+app.conf.task_time_limit=None
 app.conf.task_default_exchange_type = 'fanout' # 广播模式
 
 
@@ -56,7 +58,7 @@ class ReconstructTask(Task):
         delete_local_dir(work_dir)
         print(f"Task: {task_id},Status: {STATUS['Failed']}")
 
-@app.task(bind=True, time_limit=60*60,base=ReconstructTask) # bind=True 会将task(这里是customTask)实例作为第一个参数传入
+@app.task(bind=True,base=ReconstructTask) # bind=True 会将task(这里是customTask)实例作为第一个参数传入
 def reconstruct(self,uuid):
     work_dir:Path = Path(os.getenv('STORAGE_DIR')) / uuid
     video_path:Path = work_dir / f"{uuid}.mp4"
@@ -67,7 +69,7 @@ def reconstruct(self,uuid):
         raise FileNotFoundError(f"Video file not found: {video_path}")
 
     convert_video_to_images(video_path=video_path,image_dir=image_dir,num_frames_target=320)
-    convert_images_to_colmap(source_path=work_dir,no_gpu=False,berbose=False)
+    convert_images_to_colmap(source_path=work_dir,no_gpu=False,verbose=False)
     
 
     # train model ,uplaod the ply  and share the url

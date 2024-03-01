@@ -9,8 +9,10 @@ import testing from './views/testing.vue';
     <RouterLink to="/login"> Login</RouterLink>
     <RouterLink to="/home"> Home</RouterLink>
     <RouterLink to="/test"> Testing</RouterLink>
-    
-    <RouterView></RouterView>
+    <!-- 异步加载组件 -->
+    <Suspense>  
+        <RouterView></RouterView>
+    </Suspense>
 </template>
 
 <style scoped>

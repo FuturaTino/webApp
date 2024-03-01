@@ -1,10 +1,9 @@
 
 <template>
 
-<h1>HomeView</h1>
-加载界面前要请求后端verify token
+
 <div class="container">
-    {{ uuid }}
+
     <Upload :visible="visible"/>
     <div class="search-box">
         <div>
@@ -13,8 +12,9 @@
         </div>
         <el-button plain id="create" class="create" @click="visible=!visible" >创建</el-button>
     </div>
+
     <div class="list-box">
-        <Capture v-for="capture in captures" :key="capture.id" :capture="capture"/>
+        <Capture v-for="capture in captures" :key="capture.id" :capture="capture" :username="data.username" />
     </div>
 
 </div>
@@ -24,7 +24,7 @@
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessageBox, affixProps } from 'element-plus'
 import Capture from '@/components/Capture.vue';
-import captures from '@/data/captures.json';
+// import captures from '@/data/captures.json';
 import {RouterView,useRouter} from 'vue-router';
 import {ref} from 'vue';
 import Upload from '@/components/Upload.vue';
@@ -36,6 +36,22 @@ import {instance as api} from '@/api/api';
 
 const visible = ref(false);
 const router = useRouter();
+const captures = ref([])
+const data = ref({})
+
+
+const loadCaptures = async() =>{
+    const response =  await api.get("/captures/my/show",{
+        headers:{
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    })
+
+    return response.data;
+}
+data.value = await loadCaptures();
+captures.value = data.value.captures
+
 
 const onWindowLoad = async () => {
     // verify the token.
@@ -49,9 +65,7 @@ const onWindowLoad = async () => {
             },
 
         })
-        console.log(response);
     } catch (error) {
-        console.log(error);
         router.push('/login');
     }
 
@@ -91,7 +105,8 @@ onWindowLoad();
     .list-box {
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
+        justify-content: flex-start;
         margin-top: 2%;
+        margin-left: 10%;
     }
 </style>
