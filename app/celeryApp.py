@@ -8,10 +8,10 @@ import shutil
 from kombu import Queue
 from core.colmap.convert import convert_video_to_images,convert_images_to_colmap
 from core.dependencies import get_db
-from core.oss import upload_file,prepare_job,delete_local_dir
+from core.oss import upload_file,prepare_job,delete_local_dir,get_oss_image_url,get_oss_ply_url
 from core.reconstruct.train import training
 
-from crud.captures import update_capture_status,STATUS
+from crud.captures import update_capture_status,STATUS,update_capture_info
 
 
 load_dotenv(find_dotenv("config.env"))
@@ -27,22 +27,13 @@ app = Celery(__name__,
 
 # celery settings from https://docs.celeryq.dev/en/stable/userguide/configuration.html
 app.conf.broker_connection_retry_on_startup = True
-# About routes https://docs.celeryq.dev/en/stable/userguide/routing.html
-# app.conf.task_default_exchange = 'default'
-# app.conf.task_default_queue = 'default'
+app.conf.worker_max_tasks_per_child = 1 # PoolWorker子进程在执行1个任务后重启，可以防止内存泄露。
+app.conf.worker_concurrency = 2
 app.conf.task_default_exchange_type = 'fanout' # 广播模式
-app.conf.task_queues = (
-    Queue('colmap', routing_key='colmap.low'), # exchange:实体交换机 ；交换机中的routing_key 永远区分 一个celery中的多个队列（优先级）
-    Queue('gs', routing_key='gs.low')
-)
 
-class colmapTask(Task):
-    def __init__(self) -> None:
-        root_dir = Path(__file__).parent # app dir
-        self.sotrage_dir = root_dir / Path(os.environ.get('STORAGE_DIR'))   
 
+class ReconstructTask(Task):
     def before_start(self, task_id, args, kwargs):
-
         update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['PreProcessing'])
         try:
             prepare_job(uuid=task_id)
@@ -50,49 +41,43 @@ class colmapTask(Task):
         except Exception as e:
             update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
             print(f"Task: {task_id},Status: {STATUS['Failed']}")
-            raise e
+            raise e 
 
     def on_success(self, retval, task_id, args, kwargs):
-        update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Queue_2'])
-        print(f"Task: {task_id},Status: {STATUS['Queue_2']} ✅💨 ")
+        update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
+        print(f"Task: {task_id},Status: {STATUS['Success']} ✅ ")
+        work_dir = Path(os.getenv('STORAGE_DIR')) / task_id
+        delete_local_dir(work_dir)
+
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
-        print(f"Task: {task_id},Status: {STATUS['Failed']}")
-    
-class gsTask(Task):
-    def __init__(self) -> None:
-        root_dir = Path(__file__).parent # app dir
-        self.sotrage_dir = root_dir / Path(os.environ.get('STORAGE_DIR'))  
-
-    def before_start(self, task_id, args, kwargs):
-        update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Reconstructing'])
-        print(f"Task: {task_id},Status: {STATUS['Reconstructing']}")
-
-    def on_success(self, retval, task_id, args, kwargs):
-        try:
-            work_dir = Path(os.getenv('STORAGE_DIR')) / task_id
-            delete_local_dir(work_dir)
-            update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
-            print(f"Task: {task_id},Status: {STATUS['Success']} ✅ ")
-        except Exception as e:
-            update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
-            raise e
-        
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
-        update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
+        work_dir = Path(os.getenv('STORAGE_DIR')) / task_id
+        delete_local_dir(work_dir)
         print(f"Task: {task_id},Status: {STATUS['Failed']}")
 
-@app.task(bind=True, time_limit=60*60,base=colmapTask) # bind=True 会将task(这里是customTask)实例作为第一个参数传入
-def process(self,uuid):
-    pass
-@app.task(bind=True, time_limit=60*60,base=gsTask)
+@app.task(bind=True, time_limit=60*60,base=ReconstructTask) # bind=True 会将task(这里是customTask)实例作为第一个参数传入
 def reconstruct(self,uuid):
-    pass
+    work_dir:Path = Path(os.getenv('STORAGE_DIR')) / uuid
+    video_path:Path = work_dir / f"{uuid}.mp4"
+    ply_path = work_dir / f"{uuid}.ply"
+    image_dir = work_dir / "input"
+    if not video_path.exists():
+        update_capture_status(db=next(get_db()),uuid=uuid,status=STATUS['Failed'])
+        raise FileNotFoundError(f"Video file not found: {video_path}")
+
+    convert_video_to_images(video_path=video_path,image_dir=image_dir,num_frames_target=320)
+    convert_images_to_colmap(source_path=work_dir,no_gpu=False,verbose=False)
     
 
-    
-    
-    
-    
+    # train model ,uplaod the ply  and share the url
+    update_capture_status(db=next(get_db()),uuid=uuid,status=STATUS['Reconstructing'])
+    try:
+        training(source_path=work_dir,model_path=work_dir, uuid=uuid,saving_iterations=[30000])
+        upload_file(oss_key=f"ply/{uuid}.ply",local_path=str*(ply_path))
+        image_url = get_oss_image_url(object_name=uuid)
+        result_url = get_oss_ply_url(object_name=uuid)
+        update_capture_info(db=next(get_db()),uuid=uuid,image_url=image_url,result_url=result_url)
+    except Exception as e:
+        raise e
 

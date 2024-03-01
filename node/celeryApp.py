@@ -41,7 +41,7 @@ class ReconstructTask(Task):
         except Exception as e:
             update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Failed'])
             print(f"Task: {task_id},Status: {STATUS['Failed']}")
-            raise e
+            raise e 
 
     def on_success(self, retval, task_id, args, kwargs):
         update_capture_status(db=next(get_db()),uuid=task_id,status=STATUS['Success'])
@@ -57,7 +57,7 @@ class ReconstructTask(Task):
         print(f"Task: {task_id},Status: {STATUS['Failed']}")
 
 @app.task(bind=True, time_limit=60*60,base=ReconstructTask) # bind=True 会将task(这里是customTask)实例作为第一个参数传入
-def Reconstruct(self,uuid):
+def reconstruct(self,uuid):
     work_dir:Path = Path(os.getenv('STORAGE_DIR')) / uuid
     video_path:Path = work_dir / f"{uuid}.mp4"
     ply_path = work_dir / f"{uuid}.ply"

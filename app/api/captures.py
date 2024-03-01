@@ -11,7 +11,7 @@ from models.captures import Capture
 from core.dependencies import get_db
 from core.auth import get_current_user
 from core.oss import prepare_job,get_oss_image_url,get_oss_ply_url,delete_oss_file
-from celeryApp import process,reconstruct
+from celeryApp import reconstruct
 
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
@@ -156,7 +156,7 @@ def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str
         # 开启预处理，与训练模型
         # task link https://docs.celeryq.dev/en/stable/userguide/calling.html
         update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])
-        process.apply_async(args=(uuid,),task_id=uuid)
+        reconstruct.apply_async(args=(uuid,),task_id=uuid)
 
         # process.apply_async(args=(uuid,),task_id=uuid,
         #                     link=reconstruct.si(uuid).set(queue="gs",
