@@ -156,33 +156,21 @@ def enqueued_capture(uuid:str, db:Session = Depends(get_db),current_username:str
         # 开启预处理，与训练模型
         # task link https://docs.celeryq.dev/en/stable/userguide/calling.html
         update_capture_status(db=db, uuid=uuid, status=STATUS['Queued'])
-        process.apply_async(args=(uuid,),task_id=uuid,
-                            link=reconstruct.si(uuid).set(queue="gs",
-                                                          routing_key="gs.low",
-                                                          ignore_result=True,
-                                                          task_id=uuid),
-                            ignore_result=True,
-                            queue="colmap",
-                            routing_key="colmap.low")
+        process.apply_async(args=(uuid,),task_id=uuid)
+
+        # process.apply_async(args=(uuid,),task_id=uuid,
+        #                     link=reconstruct.si(uuid).set(queue="gs",
+        #                                                   routing_key="gs.low",
+        #                                                   ignore_result=True,
+        #                                                   task_id=uuid),
+        #                     ignore_result=True,
+        #                     queue="colmap",
+        #                     routing_key="colmap.low")
     except Exception as e:
-        print(e)
         update_capture_status(db=db, uuid=uuid, status=STATUS['Failed'])
         raise HTTPException(status_code=500, detail=e)
 
     return {"message":f"{uuid} is queued for processing"}
-
-@router.post("/captures/train",summary="需要token,在预处理前提上，训练模型")
-def train_capture(uuid:str, db:Session = Depends(get_db),current_username:str = Depends(get_current_user)):
-    try:
-        # train.apply_async((uuid,),task_id=uuid)
-        pass # 训练功能暂未实现
-        update_capture_status(db=db, uuid=uuid, status=STATUS['Reconstructing'])
-    except Exception as e:
-        print(e)
-        update_capture_status(db=db, uuid=uuid, status=STATUS['Failed'])
-        raise HTTPException(status_code=500, detail=e)
-    
-    return {"message":f"{uuid} is reconstructing"}
 
 @router.post("/captures/refresh",summary="无需token,刷新某个作品的状态至最原始创建状态")
 def refresh_capture(uuid:str, db:Session = Depends(get_db)):
