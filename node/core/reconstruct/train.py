@@ -21,9 +21,9 @@ import uuid
 from tqdm import tqdm
 from core.reconstruct.utils.image_utils import psnr
 from argparse import ArgumentParser, Namespace
-
+from celery.utils.log import get_task_logger
 from pathlib import Path 
-
+logger = get_task_logger("celeryApp")
 class ModelParams:
     def __init__(self):
         self.sh_degree = 3
@@ -120,7 +120,7 @@ def training(source_path:Path,model_path:Path,uuid:str,debug_from:int=None, savi
         with torch.no_grad():
             ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
             if iteration % 5000 == 0:
-                print(f"[ITER {iteration}/30000]:{uuid} Loss: {ema_loss_for_log:.{7}f}",end="\r")
+                logger.info(f"[ITER {iteration}/30000]:{uuid} Loss: {ema_loss_for_log:.{7}f}")
 
             # Densification
             if iteration < opt.densify_until_iter:
@@ -145,7 +145,7 @@ def training(source_path:Path,model_path:Path,uuid:str,debug_from:int=None, savi
 
         
         if (iteration in saving_iterations):
-            print("\n[ITER {}] Saving Gaussians".format(iteration))
+            logger.info("\n[ITER {}] Saving Gaussians".format(iteration))
             scene.save(iteration,uuid=uuid) 
         torch.cuda.empty_cache()
 

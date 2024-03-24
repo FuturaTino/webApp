@@ -8,6 +8,8 @@ from rich.console import Console
 import re 
 import logging
 import os 
+from celery.utils.log import get_task_logger
+logger = get_task_logger("celeryApp")
 CONSOLE = Console(width=120)
 def run_command(cmd: str, verbose=False) -> Optional[str]:
     """Runs a command and returns the output.
@@ -169,7 +171,7 @@ def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=Tr
         distorted_sparse_dir.mkdir(exist_ok=True, parents=True)
 
         ## 1. Feature extraction
-        print(f"(1/4):{source_path.name} Feature extraction starts.")
+        logger.info(f"(1/4):{source_path.name} Feature extraction starts.")
         feat_extracton_cmd = f"{colmap_command} feature_extractor \
             --database_path {distorted_database_path} \
             --image_path {image_dir} \
@@ -177,18 +179,18 @@ def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=Tr
             --ImageReader.camera_model {camera} \
             --SiftExtraction.use_gpu {use_gpu}"
         run_command(feat_extracton_cmd, verbose=verbose)
-        print(f"(1/4):{source_path.name} Feature extraction completes.")
+        logger.info(f"(1/4):{source_path.name} Feature extraction completes.")
 
         ## 2. Feature matching
-        print(f"(2/4):{source_path.name} Feature matching starts.")
+        logger.info(f"(2/4):{source_path.name} Feature matching starts.")
         feat_matching_cmd = f"{colmap_command} exhaustive_matcher \
             --database_path {distorted_database_path} \
             --SiftMatching.use_gpu {use_gpu}"
         run_command(feat_matching_cmd, verbose=verbose)
-        print(f"(2/4):{source_path.name} Feature matching completes.")
+        logger.info(f"(2/4):{source_path.name} Feature matching completes.")
 
         ### 3. Bundle adjustment
-        print(f"(3/4):{source_path.name} Bundle adjustment starts.")
+        logger.info(f"(3/4):{source_path.name} Bundle adjustment starts.")
         # The default Mapper tolerance is unnecessarily large,
         # decreasing it speeds up bundle adjustment steps.
         mapper_cmd = f"{colmap_command} mapper \
@@ -197,25 +199,28 @@ def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=Tr
             --output_path {distorted_sparse_dir} \
             --Mapper.ba_global_function_tolerance=0.000001"
         run_command(mapper_cmd, verbose=verbose)
-        print(f"(3/4):{source_path.name} Bundle adjustment completes.")
+        logger.info(f"(3/4):{source_path.name} Bundle adjustment completes.")
 
     ### 4. Image undistortion
     ## We need to undistort our images into ideal pinhole intrinsics.
     distorted_sparse_0_dir = distorted_sparse_dir / "0" 
     distorted_sparse_0_dir.mkdir(exist_ok=True, parents=True)
 
-    print(f"(4/4):{source_path.name} Image undistortion starts.")
+    logger.info(f"(4/4):{source_path.name} Image undistortion starts.")
     img_undist_cmd = f"{colmap_command} image_undistorter \
         --image_path {image_dir} \
         --input_path {distorted_sparse_0_dir} \
         --output_path {source_path} \
         --output_type COLMAP"
     run_command(img_undist_cmd, verbose=verbose)
-    print(f"(4/4):{source_path.name} Image undistortion")
+    logger.info(f"(4/4):{source_path.name} Image undistortion")
     sparse_dir = source_path / "sparse"
     sparse_0_dir = sparse_dir / "0"
-    files = os.listdir(sparse_dir)
+    sparse_dir.mkdir(exist_ok=True,parents=True)
+
     sparse_0_dir.mkdir(exist_ok=True, parents=True)
+    files = os.listdir(sparse_dir)
+
     # Copy each file from the source directory to the destination directory
 
     for file in files:
@@ -234,7 +239,7 @@ def convert_images_to_colmap(source_path:Path,camera:str="OPENCV",no_gpu:bool=Tr
     except Exception as e:
         print(e)
 
-    print("Done.")
+    logger.info("Done.")
 
 def testing():
     import time
