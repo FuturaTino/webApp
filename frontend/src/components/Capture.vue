@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import captures from "@/data/captures.json" 
 import { ref } from "vue"
 import { defineProps } from "vue";

@@ -17,7 +17,7 @@
         </form>
     </div>
 </template>
-<script setup>
+<script lang="ts" setup>
 import { ref } from 'vue';
 import axios from "axios";
 import {instance as api} from "@/api/api";

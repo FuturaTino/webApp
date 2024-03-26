@@ -20,7 +20,7 @@
 </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessageBox, affixProps } from 'element-plus'
 import Capture from '@/components/Capture.vue';
@@ -50,8 +50,6 @@ const loadCaptures = async() =>{
     return response.data;
 }
 data.value = await loadCaptures();
-captures.value = data.value.captures
-
 
 const onWindowLoad = async () => {
     // verify the token.

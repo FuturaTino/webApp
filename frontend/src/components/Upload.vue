@@ -72,7 +72,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 import {defineProps} from 'vue'

@@ -12,13 +12,10 @@
     >
 
         <div class="flex-grow" />
-        <el-menu-item index="2"><RouterLink to="/testing">主页</RouterLink></el-menu-item>
-        <el-menu-item index="3"><RouterLink to="/testing">教程</RouterLink></el-menu-item>
-        <el-menu-item index="1"><RouterLink to="/home">我的作品</RouterLink></el-menu-item>
-
-        <el-menu-item index="4"><RouterLink to="/register">注册</RouterLink></el-menu-item>
-        <el-menu-item index="5"><RouterLink to="/login">登录</RouterLink></el-menu-item>
-        <el-menu-item index="6"><RouterLink to="/testing">我的</RouterLink></el-menu-item>
+        <el-menu-item index="4"><RouterLink to="/index">主页</RouterLink></el-menu-item>
+        <el-menu-item index="3"><RouterLink to="/home">我的作品</RouterLink></el-menu-item>
+        <el-menu-item index="2"><RouterLink to="/register">注册</RouterLink></el-menu-item>
+        <el-menu-item index="1"><RouterLink to="/login">登录</RouterLink></el-menu-item>
 
     </el-menu>
 
@@ -38,7 +35,7 @@
     import Capture  from './components/Capture.vue';
     import testing from './views/testing.vue';
   const activeIndex = ref('1')
-  const handleSelect = (key: string, keyPath: string[]) => {
+  const handleSelect = (key:string, keyPath:string[]) => {
     console.log(key, keyPath)
   }
 </script>
