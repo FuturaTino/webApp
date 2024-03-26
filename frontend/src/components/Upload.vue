@@ -4,6 +4,52 @@
       <label for="title">标题:</label>
       <el-input id="title" v-model="title" placeholder="请输入标题"></el-input>
     </div>
+    <div>
+      <label for="iterations">迭代次数:</label>
+      <el-input id="iterations" v-model="iterations" placeholder="输入迭代次数" ></el-input>
+    </div>
+
+    <div>
+      <label for="feature_lr">特征的学习率:</label>
+      <el-input id="feature_lr" v-model="feature_lr" placeholder="输入特征的学习率"></el-input>
+    </div>
+
+
+    <div>
+      <label>不透明度阈值:</label>
+      <el-radio-group v-model="opacity_threshold">
+        <el-radio :label="0.004">0.004</el-radio>
+        <el-radio :label="0.005">0.005</el-radio>
+        <el-radio :label="0.006">0.006</el-radio>
+      </el-radio-group>
+    </div>
+
+    <div>
+      <label>尺寸阈值:</label>
+      <el-radio-group v-model="size_threshold">
+        <el-radio :label="18">18</el-radio>
+        <el-radio :label="20">20</el-radio>
+        <el-radio :label="22">22</el-radio>
+      </el-radio-group>
+    </div>
+
+    <div>
+      <label>不透明度重置间隔:</label>
+      <el-radio-group v-model="opacity_reset_interval">
+        <el-radio :label="2800">2800</el-radio>
+        <el-radio :label="3000">3000</el-radio>
+        <el-radio :label="3200">3200</el-radio>
+      </el-radio-group>
+    </div>
+
+    <div>
+      <label>稠密化操作的间隔:</label>
+      <el-radio-group v-model="densification_interval">
+        <el-radio :label="90">90</el-radio>
+        <el-radio :label="100">100</el-radio>
+        <el-radio :label="110">110</el-radio>
+      </el-radio-group>
+    </div>
 
     <div>
       <el-radio-group v-model="visibility">
@@ -11,7 +57,6 @@
         <el-radio label="private">仅自己查看</el-radio>
       </el-radio-group>
     </div>
-
     <el-upload drag multiple
         :before-upload="handleBeforeUpload" class="mx-4" :http-request="fileUpload" v-if="title">
         <el-icon class="el-icon--upload" style="height: 150px">
@@ -21,7 +66,7 @@
             将文件拖动到这里或者<em>点击上传</em>
         </div>
         <template #tip>
-            <div class="el-upload__tip">文件不能超过100MB</div>
+            <div class="el-upload__tip">文件不能超过4096MB</div>
         </template>
     </el-upload>
   </div>
@@ -41,7 +86,12 @@ import {v4 as uuidv4} from 'uuid'
 const title = ref('')
 const visibility = ref('public')
 const uuid = ref('')
-
+const iterations = ref(30000)
+const feature_lr = ref(0.00016)
+const opacity_threshold = ref(0.004)
+const size_threshold = ref(18)
+const opacity_reset_interval = ref(2800)
+const densification_interval = ref(90)
 // 上传Oss服务器的基本信息 
 const props = defineProps(['visible'])
 const uploadData = ref({})
@@ -124,5 +174,8 @@ const handleAfterUpload = async ()=>{
   padding-block: 2%;
   padding-inline: 1%;
   margin-bottom: 3%;
+}
+label {
+  margin-right: 10px;
 }
 </style>
