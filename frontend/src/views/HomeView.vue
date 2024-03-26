@@ -26,18 +26,48 @@ import { ElMessageBox, affixProps } from 'element-plus'
 import Capture from '@/components/Capture.vue';
 // import captures from '@/data/captures.json';
 import {RouterView,useRouter} from 'vue-router';
-import {ref} from 'vue';
+import {ref,onMounted} from 'vue';
 import Upload from '@/components/Upload.vue';
 import {v4 as uuidv4} from 'uuid';
 const uuid = uuidv4();
 import {instance as api} from '@/api/api';
 
+interface capture {
+    id: number;
+    info: {
+        title: string;
+        image_url: string;
+        date: string;
+        result_url: string;
+        uuid: string;
+    };
+    status: {
+        latest_run_current_stage: string;
+        latest_run_status: string;
+    };
+
+}
+interface data{
+    captures: capture[];
+    username: string;
+    email: string;
+    id: number;
+    is_activate:true;
+
+}
 
 
 const visible = ref(false);
 const router = useRouter();
-const captures = ref([])
-const data = ref({})
+const captures = ref<capture[]>([])
+const data = ref<data>({
+    captures: [],
+    username: "",
+    email: "",
+    id: 0,
+    is_activate: true
+
+})
 
 
 const loadCaptures = async() =>{
@@ -50,8 +80,9 @@ const loadCaptures = async() =>{
     return response.data;
 }
 data.value = await loadCaptures();
+captures.value = data.value.captures;
 
-const onWindowLoad = async () => {
+onMounted(async () => {
     // verify the token.
     const token = localStorage.getItem("token");
     const paramsString = `token=${token}`
@@ -63,13 +94,11 @@ const onWindowLoad = async () => {
             },
 
         })
+
     } catch (error) {
         router.push('/login');
     }
-
-}
-
-onWindowLoad();
+})
 
 </script>
 
